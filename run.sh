@@ -9,8 +9,9 @@ PORT=8989
 # apparently, can't get pid regularly
 pid1=$(lsof -n -i :8989 | grep LISTEN | grep Google | awk '{print $2}')
 
-export THINKERCAD_URL=  
+export THINKERCAD_URL=https://www.tinkercad.com/things/eCe35FTAbqM-brave-hillar-bombul/editel
 export DEBUGGER_PORT=$PORT
+export DESTINATION_PHONE_NUMBER=+972526982308
 
 python index.py &
 pid2=$!
