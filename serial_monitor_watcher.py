@@ -5,7 +5,7 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 import json
-from sample import Sample
+from models import UltrasonicRead
 from typing import Callable
 from env import (
     SAMPLE_RATE_MS,
@@ -43,7 +43,6 @@ def is_code_panel_open(driver: WebDriver):
     code_panel_right_position = code_panel.value_of_css_property(property_name='right')
     return code_panel_right_position == '0px'
 
-
 def open_code_editor(driver: WebDriver):
     is_open = is_code_panel_open(driver=driver)
     if not is_open:
@@ -62,7 +61,7 @@ def start_simulation(driver: WebDriver):
     start_simulation_button = driver.find_element(by=By.ID, value='SIMULATION_ID')
     start_simulation_button.click()
 
-def sample_serial_monitor(driver: WebDriver, on_new_read: Callable[[list[Sample]], None]):
+def sample_serial_monitor(driver: WebDriver, on_new_read: Callable[[list[UltrasonicRead]], None]):
     # so basically serial monitor is bound to max line of 60
     # so reading all of it all the time and take last should be fine as long as
     # the service output in less frequent than the python read rate
@@ -78,7 +77,7 @@ def extract_valid_samples(data: str):
     lines = data.split('\n')
     for line in lines:
         try:
-            sample = Sample(**json.loads(line))
+            sample = UltrasonicRead(**json.loads(line))
             samples.append(sample)
         except ValueError:
             # print(f'faled to load incomplete line={line}')
@@ -86,7 +85,7 @@ def extract_valid_samples(data: str):
             pass
     return samples
 
-def watch(notify: Callable[[list[Sample]], None]):
+def watch(notify: Callable[[list[UltrasonicRead]], None]):
     driver = open_simulation()
     open_serial_monitor(driver=driver)
     driver.implicitly_wait(1)
@@ -94,9 +93,9 @@ def watch(notify: Callable[[list[Sample]], None]):
 
     last_sample_time = 0
 
-    def on_new_read(new_samples: list[Sample]):
+    def on_new_read(new_samples: list[UltrasonicRead]):
         nonlocal last_sample_time
-        delta: list[Sample] = []
+        delta: list[UltrasonicRead] = []
         if len(new_samples) == 0:
             return
         for sample in new_samples:

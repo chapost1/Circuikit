@@ -1,5 +1,5 @@
 from dataclasses import dataclass
 
 @dataclass(frozen=True)
-class Sample:
+class UltrasonicRead:
     time: int
