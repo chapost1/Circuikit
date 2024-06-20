@@ -1,5 +1,7 @@
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.remote.webdriver import WebDriver
+from selenium.webdriver.support.wait import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 import json
@@ -26,7 +28,14 @@ def open_simulation() -> WebDriver:
     # Now, you can interact with the already opened Chrome browser
     print(f'Driver opens url={THINKERCAD_URL}')
     driver.get(THINKERCAD_URL)
-    driver.implicitly_wait(5)
+    try:
+        WebDriverWait(driver=driver, timeout=10).until(
+            EC.presence_of_element_located((By.ID, 'CODE_EDITOR_ID'))
+        )
+    except:
+        print('Failed to load page in specified timeout due to indicator')
+        driver.quit()
+        exit(1)
     return driver
 
 def is_code_panel_open(driver: WebDriver):
