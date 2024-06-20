@@ -91,7 +91,6 @@ def watch(notify: Callable[[list[Sample]], None]):
     open_serial_monitor(driver=driver)
     driver.implicitly_wait(1)
     start_simulation(driver=driver)
-    driver.implicitly_wait(1)
 
     last_sample_time = 0
 
