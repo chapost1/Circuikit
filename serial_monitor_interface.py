@@ -2,19 +2,23 @@ from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.remote.webdriver import WebDriver
 from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.common.keys import Keys
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 import json
 from typing import Callable, TypedDict
-from env import (
-    SAMPLE_RATE_MS,
-    THINKERCAD_URL,
-    DEBUGGER_PORT,
-)
 import logging
 from selenium.webdriver.remote.remote_connection import LOGGER
+import threading
+import queue
 
 LOGGER.setLevel(logging.WARNING)
+
+SAMPLE_RATE_MS = 5.0
+THINKERCAD_URL = (
+    "https://www.tinkercad.com/things/eCe35FTAbqM-brave-hillar-bombul/editel"
+)
+DEBUGGER_PORT = 8989
 
 
 class Sample(TypedDict):
@@ -76,12 +80,14 @@ def start_simulation(driver: WebDriver):
 
 
 def sample_serial_monitor(
-    driver: WebDriver, on_new_read: Callable[[list[Sample]], None]
+    driver: WebDriver,
+    on_new_read: Callable[[list[Sample]], None],
+    stop_event: threading.Event,
 ):
     # so basically serial monitor is bound to max line of 60
     # so reading all of it all the time and take last should be fine as long as
     # the service output in less frequent than the python read rate
-    while True:
+    while not stop_event.is_set():
         serial_content = driver.find_element(
             by=By.CLASS_NAME, value="code_panel__serial__content__text"
         )
@@ -100,11 +106,8 @@ def extract_valid_samples(data: str):
     for line in lines:
         try:
             sample: Sample = json.loads(line)
-            if not "time" in sample:
-                # invalid sample json, seems like there is an error in base assumptions.
-                # kill process
-                raise RuntimeError(f"Invalid Samples, missing time key: {sample}")
-            samples.append(sample)
+            if isinstance(sample, dict):
+                samples.append(sample)
         except ValueError:
             # print(f'faled to load incomplete line={line}')
             # that's expected...
@@ -112,13 +115,12 @@ def extract_valid_samples(data: str):
     return samples
 
 
-def watch(on_next_read: Callable[[Sample], None]):
+def watch(
+    driver: WebDriver,
+    on_next_read: Callable[[Sample], None],
+    stop_event: threading.Event,
+):
     last_sample_time = -1
-
-    driver = open_simulation()
-    open_serial_monitor(driver=driver)
-    driver.implicitly_wait(1)
-    start_simulation(driver=driver)
 
     def on_new_read(new_samples: list[Sample]):
         nonlocal last_sample_time
@@ -134,7 +136,81 @@ def watch(on_next_read: Callable[[Sample], None]):
         for sample in delta_samples:
             on_next_read(sample)
 
-    sample_serial_monitor(driver=driver, on_new_read=on_new_read)
+    sample_serial_monitor(driver=driver, on_new_read=on_new_read, stop_event=stop_event)
 
-    # Remember to close the WebDriver when you're done
-    driver.quit()
+
+def speak_with_serial_monitor(
+    driver: WebDriver, messages_queue: queue.Queue, stop_event: threading.Event
+):
+    while not stop_event.is_set():
+        driver.implicitly_wait(1)
+        message = messages_queue.get()
+        if message is None:
+            print("message is none")
+            continue
+        serial_input = driver.find_element(
+            by=By.CLASS_NAME, value="code_panel__serial__input"
+        )
+        if serial_input is None:
+            print("cannot find serial input")
+            continue
+        serial_input.send_keys(message)
+        serial_input.send_keys(Keys.ENTER)
+        messages_queue.task_done()
+
+
+class SerialMonitorInterface:
+    __slots__ = (
+        "driver",
+        "messages_to_send_queue",
+        "sender_thread",
+        "watcher_thread",
+        "stop_event",
+    )
+
+    def __init__(self, on_next_read: Callable[[Sample], None]):
+        self.driver = open_simulation()
+        self.messages_to_send_queue = queue.Queue()
+
+        self.stop_event = threading.Event()
+
+        self.sender_thread = threading.Thread(
+            target=speak_with_serial_monitor,
+            args=(
+                self.driver,
+                self.messages_to_send_queue,
+                self.stop_event,
+            ),
+            daemon=True,
+        )
+        self.watcher_thread = threading.Thread(
+            target=watch,
+            args=(
+                self.driver,
+                on_next_read,
+                self.stop_event,
+            ),
+            daemon=True,
+        )
+
+    def __destroy__(self):
+        if self.driver is not None:
+            self.driver.quit()
+            self.driver = None
+        if self.sender_thread.is_alive():
+            self.stop_event.set()
+
+    def _init_simulation(self):
+        if self.driver is None:
+            raise RuntimeError("Unexpected. driver is None")
+        open_serial_monitor(driver=self.driver)
+        start_simulation(driver=self.driver)
+        self.driver.implicitly_wait(1)
+
+    def send_message(self, message: str):
+        self.messages_to_send_queue.put(message)
+
+    def start(self):
+        self._init_simulation()
+        self.sender_thread.start()
+        self.watcher_thread.start()

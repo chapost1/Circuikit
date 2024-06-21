@@ -1,9 +1,9 @@
 from multiprocessing import JoinableQueue
 from multiprocessing import Process
-import serial_monitor_watcher
+import serial_monitor_interface
 import radar
 import alert_manager
-
+import time
 import logger
 from typing import Any, Protocol
 from models import UltrasonicRead
@@ -34,8 +34,15 @@ def producer(queue: JoinableQueue):
     def on_next_read(sample: Any):  # actually a dict...
         queue.put(sample)
 
+    smi = serial_monitor_interface.SerialMonitorInterface(on_next_read=on_next_read)
     # fan in - single producer
-    serial_monitor_watcher.watch(on_next_read=on_next_read)
+    smi.start()
+    time.sleep(5)
+    while True:
+        smi.send_message("<some_num=4 some_num2=14 some_str=hakuna matata>")
+        # stay alive
+        time.sleep(60)
+
     # send a signal that no further tasks are coming
     queue.put(None)
     print("Producer finished", flush=True)
