@@ -1,17 +1,13 @@
 import time
 import os
 import json
-from env import (
-    READINGS_FILE_PATH,
-    INCIDENTS_FILE_PATH
-)
+from env import READINGS_FILE_PATH, INCIDENTS_FILE_PATH
 
-from models import (
-    UltrasonicRead
-)
+from models import UltrasonicRead
+
 
 def follow(file_descriptor):
-    '''generator function that yields new lines in a file'''
+    """generator function that yields new lines in a file"""
     # seek the end of the file
     file_descriptor.seek(0, os.SEEK_END)
 
@@ -26,7 +22,8 @@ def follow(file_descriptor):
 
         yield line
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     readings = follow(file_descriptor=open(READINGS_FILE_PATH, "r"))
     # iterate over the generator
     for line in readings:
@@ -35,5 +32,3 @@ if __name__ == '__main__':
         if False:
             with open(INCIDENTS_FILE_PATH, "a") as incidents_file:
                 incidents_file.write('{"hello": "world"}\n')
-
-
