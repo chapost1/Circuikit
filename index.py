@@ -27,60 +27,74 @@ def fan_out(sample: dict):
         sub.on_new_read(new_read=read)
 
 
-# task for the producer process
-def producer(queue: JoinableQueue):
-    print("Producer starting", flush=True)
-
+def smi_task(readins_queue: JoinableQueue, writings_queue: JoinableQueue):
     def on_next_read(sample: Any):  # actually a dict...
-        queue.put(sample)
+        readins_queue.put(sample)
 
-    smi = serial_monitor_interface.SerialMonitorInterface(on_next_read=on_next_read)
+    smi = serial_monitor_interface.SerialMonitorInterface(
+        on_next_read=on_next_read, messages_to_send_queue=writings_queue
+    )
     # fan in - single producer
     smi.start()
-    time.sleep(5)
+
     while True:
-        smi.send_message("<some_num=4 some_num2=14 some_str=hakuna matata>")
         # stay alive
         time.sleep(60)
 
     # send a signal that no further tasks are coming
-    queue.put(None)
-    print("Producer finished", flush=True)
+    readins_queue.put(None)
 
 
-# task for the consumer process
-def consumer(queue: JoinableQueue):
-    print("Consumer starting", flush=True)
+def app_task(readins_queue: JoinableQueue, writings_queue: JoinableQueue):
     # process items from the queue
+    iteration = 0
+
     while True:
         # get a task from the queue
-        sample = queue.get()
+        sample = readins_queue.get()
         # check for signal that we are done
         if sample is None:
             break
         # process
         fan_out(sample=sample)
         # mark the unit of work as processed
-        queue.task_done()
+        readins_queue.task_done()
+        iteration = (iteration + 1) % 10
+        if iteration % 10 == 0:
+            writings_queue.put("<some_num=4 some_num2=14 some_str=hakuna matata>")
 
     # mark the signal as processed
-    queue.task_done()
+    readins_queue.task_done()
     print("Consumer finished", flush=True)
 
 
 # entry point
 if __name__ == "__main__":
-    # create the shared queue
-    queue = JoinableQueue()
-    # create and start the producer process
-    producer_process = Process(target=producer, args=(queue,), daemon=True)
-    producer_process.start()
-    # create and start the consumer process
-    consumer_process = Process(target=consumer, args=(queue,), daemon=True)
-    consumer_process.start()
-    # wait for the producer to finish
-    producer_process.join()
-    print("Main found that the producer has finished", flush=True)
-    # wait for the queue to empty
-    queue.join()
+    readins_queue = JoinableQueue()
+    writings_queue = JoinableQueue()
+
+    smi_process = Process(
+        target=smi_task,
+        args=(
+            readins_queue,
+            writings_queue,
+        ),
+        daemon=True,
+    )
+    smi_process.start()
+
+    app_process = Process(
+        target=app_task,
+        args=(
+            readins_queue,
+            writings_queue,
+        ),
+        daemon=True,
+    )
+    app_process.start()
+
+    app_process.join()
+
+    readins_queue.join()
+    writings_queue.join()
     print("Main found that all tasks are processed", flush=True)

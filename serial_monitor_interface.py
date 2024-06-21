@@ -6,7 +6,7 @@ from selenium.webdriver.common.keys import Keys
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 import json
-from typing import Callable, TypedDict
+from typing import Callable, TypedDict, Protocol
 import logging
 from selenium.webdriver.remote.remote_connection import LOGGER
 
@@ -19,6 +19,17 @@ from env import (
     THINKERCAD_URL,
     DEBUGGER_PORT,
 )
+
+
+class QueueProtocol(Protocol):
+    def get(self):
+        pass
+
+    def put(self, obj, block: bool = True, timeout: float | None = None) -> None:
+        pass
+
+    def task_done(self) -> None:
+        pass
 
 
 class Sample(TypedDict):
@@ -106,8 +117,12 @@ def extract_valid_samples(data: str):
     for line in lines:
         try:
             sample: Sample = json.loads(line)
-            if isinstance(sample, dict):
-                samples.append(sample)
+            if not isinstance(sample, dict):
+                continue
+            if not "time" in sample:
+                print(f"sample={sample} has no .time key, skipping...")
+                continue
+            samples.append(sample)
         except ValueError:
             # print(f'faled to load incomplete line={line}')
             # that's expected...
@@ -140,7 +155,7 @@ def watch(
 
 
 def speak_with_serial_monitor(
-    driver: WebDriver, messages_queue: queue.Queue, stop_event: threading.Event
+    driver: WebDriver, messages_queue: QueueProtocol, stop_event: threading.Event
 ):
     while not stop_event.is_set():
         driver.implicitly_wait(1)
@@ -168,9 +183,13 @@ class SerialMonitorInterface:
         "stop_event",
     )
 
-    def __init__(self, on_next_read: Callable[[Sample], None]):
+    def __init__(
+        self,
+        on_next_read: Callable[[Sample], None],
+        messages_to_send_queue: QueueProtocol = queue.Queue(),  # type: ignore
+    ):
         self.driver = open_simulation()
-        self.messages_to_send_queue = queue.Queue()
+        self.messages_to_send_queue = messages_to_send_queue
 
         self.stop_event = threading.Event()
 

@@ -4,7 +4,7 @@ from models import UltrasonicRead
 
 
 def on_new_read(new_read: UltrasonicRead):
-    print(f"[AL]: {new_read}")
+    print(f"[AL]: {new_read}", flush=True)
 
 
 # TODO: listen to some incidents file or something
