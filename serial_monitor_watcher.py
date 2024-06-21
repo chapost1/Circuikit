@@ -10,8 +10,11 @@ from env import (
     SAMPLE_RATE_MS,
     THINKERCAD_URL,
     DEBUGGER_PORT,
-    READINGS_FILE_PATH,
 )
+import logging
+from selenium.webdriver.remote.remote_connection import LOGGER
+
+LOGGER.setLevel(logging.WARNING)
 
 
 class Sample(TypedDict):
@@ -106,7 +109,7 @@ def extract_valid_samples(data: str):
     return samples
 
 
-if __name__ == "__main__":
+def watch(on_next_read: Callable[[Sample], None]):
     last_sample_time = -1
 
     driver = open_simulation()
@@ -114,10 +117,8 @@ if __name__ == "__main__":
     driver.implicitly_wait(1)
     start_simulation(driver=driver)
 
-    readings_file = open(READINGS_FILE_PATH, "a")
-
     def on_new_read(new_samples: list[Sample]):
-        global last_sample_time
+        nonlocal last_sample_time
         delta_samples: list[Sample] = []
         if len(new_samples) == 0:
             return
@@ -128,10 +129,9 @@ if __name__ == "__main__":
         last_sample_time = new_samples[-1]["time"]
 
         for sample in delta_samples:
-            readings_file.write(f"{json.dumps(sample)}\n")
+            on_next_read(sample)
 
     sample_serial_monitor(driver=driver, on_new_read=on_new_read)
 
-    readings_file.close()
     # Remember to close the WebDriver when you're done
     driver.quit()
