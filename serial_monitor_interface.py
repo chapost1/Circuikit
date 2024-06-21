@@ -9,16 +9,16 @@ import json
 from typing import Callable, TypedDict
 import logging
 from selenium.webdriver.remote.remote_connection import LOGGER
+
+LOGGER.setLevel(logging.WARNING)
 import threading
 import queue
 
-LOGGER.setLevel(logging.WARNING)
-
-SAMPLE_RATE_MS = 5.0
-THINKERCAD_URL = (
-    "https://www.tinkercad.com/things/eCe35FTAbqM-brave-hillar-bombul/editel"
+from env import (
+    SAMPLE_RATE_MS,
+    THINKERCAD_URL,
+    DEBUGGER_PORT,
 )
-DEBUGGER_PORT = 8989
 
 
 class Sample(TypedDict):
