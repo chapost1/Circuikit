@@ -7,7 +7,7 @@ PORT=8989
 
 /Applications/Google\ Chrome.app/Contents/MacOS/Google\ Chrome --remote-debugging-port=$PORT --user-data-dir=$DIRTY_PATH/chrome-profile &
 # apparently, can't get pid regularly
-pid1=$(lsof -n -i :8989 | grep LISTEN | grep Google | awk '{print $2}')
+pid1=$(lsof -n -i :$PORT | grep LISTEN | grep Google | awk '{print $2}')
 
 LOGS_PATH=$DIRTY_PATH/logs
 mkdir -p $LOGS_PATH
