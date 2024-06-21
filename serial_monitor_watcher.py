@@ -86,6 +86,9 @@ def sample_serial_monitor(
             by=By.CLASS_NAME, value="code_panel__serial__content__text"
         )
         text = serial_content.get_attribute("innerHTML")
+        if text is None:
+            print("serial monitor text is None")
+            continue
         samples = extract_valid_samples(text)
         on_new_read(samples)
         driver.implicitly_wait(SAMPLE_RATE_MS / 1000)

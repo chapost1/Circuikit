@@ -4,7 +4,7 @@ import serial_monitor_watcher
 import radar
 import alert_manager
 
-# import logger
+import logger
 from typing import Any, Protocol
 from models import UltrasonicRead
 
@@ -17,7 +17,7 @@ class NewReadObservers(Protocol):
 subscribers: list[NewReadObservers] = [
     radar,
     alert_manager,
-    # logger.ReadingsLogger()
+    logger.ReadingsLogger(flush_treshold=60),
 ]
 
 
