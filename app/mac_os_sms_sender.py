@@ -1,7 +1,7 @@
 import subprocess
 
 
-def send(phone_number: str, message: str) -> None:
+def send_sms(phone_number: str, message: str) -> None:
     script = f"""
         on run {{targetBuddyPhone, targetMessage}}
             tell application "Messages"

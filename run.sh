@@ -16,10 +16,7 @@ export READINGS_LOG_FILE_PATH=$LOGS_PATH/readings.log
 rm -rf $READINGS_LOG_FILE_PATH
 touch $READINGS_LOG_FILE_PATH
 
-export SAMPLE_RATE_MS=5.0
-export THINKERCAD_URL=https://www.tinkercad.com/things/eCe35FTAbqM-brave-hillar-bombul/editel
 export DEBUGGER_PORT=$PORT
-export DESTINATION_PHONE_NUMBER=+972526982308
 
 python index.py &
 pid2=$!
