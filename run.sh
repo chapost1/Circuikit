@@ -1,7 +1,19 @@
 #!/bin/bash
 
 DIRTY_PATH=./dirty
-source $DIRTY_PATH/venv/bin/activate
+mkdir -p $DIRTY_PATH
+
+VENV_PATH=$DIRTY_PATH/venv
+
+if [ -d $VENV_PATH ]; then
+  echo "venv exists."
+  source $VENV_PATH/bin/activate
+else
+  echo "venv does not exists. setting it up".
+  python3 -m venv $VENV_PATH
+  source $VENV_PATH/bin/activate
+  pip install -r requirements.txt
+fi
 
 PORT=8989
 
@@ -9,16 +21,9 @@ PORT=8989
 # apparently, can't get pid regularly
 pid1=$(lsof -n -i :$PORT | grep LISTEN | grep Google | awk '{print $2}')
 
-LOGS_PATH=$DIRTY_PATH/logs
-mkdir -p $LOGS_PATH
-
-export READINGS_LOG_FILE_PATH=$LOGS_PATH/readings.log
-rm -rf $READINGS_LOG_FILE_PATH
-touch $READINGS_LOG_FILE_PATH
-
 export DEBUGGER_PORT=$PORT
 
-python index.py &
+python3 index.py &
 pid2=$!
 
 trap clear SIGHUP SIGINT SIGTERM
