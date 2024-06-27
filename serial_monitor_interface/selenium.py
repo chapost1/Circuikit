@@ -11,11 +11,6 @@ from selenium.webdriver.remote.remote_connection import LOGGER
 
 LOGGER.setLevel(logging.WARNING)
 
-from dirty.env import (
-    SELENIUM_THINKERCAD_URL,
-    SELENIUM_DEBUGGER_PORT,
-)
-
 
 class Sample(TypedDict):
     time: int
