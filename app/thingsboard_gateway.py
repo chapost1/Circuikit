@@ -3,12 +3,21 @@ import requests
 import dataclasses
 import signal
 import sys
+import time
+from .task import Task
 
 
-class ThingsBoardGateway:
-    __slots__ = "token"
+def current_milli_time():
+    return round(time.time() * 1000)
 
+
+MAX_REQUESTS_PER_SECOND = 5
+
+
+class ThingsBoardGateway(Task):
     def __init__(self, token: str):
+        super().__init__()
+
         # IO libraries are tricky to handle on sigint
         # So we make sure we kill it
         def signal_handler(sig, frame):
@@ -18,12 +27,20 @@ class ThingsBoardGateway:
         signal.signal(signal.SIGINT, signal_handler)
 
         self.token = token
+        self.last_request_ts_ms = -1
 
-    def on_new_read(self, new_read: Sensors) -> None:
-        print(f"[ThingsBoardGateway] new_read={new_read}", flush=True)
+    def on_message(self, message: Sensors) -> None:
+        self.send_request(message=message)
+
+    def send_request(self, message: Sensors):
+        now_ms = current_milli_time()
+        if (now_ms - self.last_request_ts_ms) < (1000 / MAX_REQUESTS_PER_SECOND):
+            print("Too many requests per second, skipping post event")
+            return
+        self.last_request_ts_ms = now_ms
         response = requests.post(
             url=f"http://thingsboard.cloud/api/v1/{self.token}/telemetry",
-            json=dataclasses.asdict(new_read),
+            json=dataclasses.asdict(message),
         )
         if response.status_code > 299:
             print(
