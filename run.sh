@@ -15,6 +15,15 @@ else
   pip install -r requirements.txt
 fi
 
+ENV_FILE_PATH=$DIRTY_PATH/env.py
+
+if [ ! -f $ENV_FILE_PATH ]; then
+    echo "[ERROR] $ENV_FILE_PATH does not exist. please create it and populate it with variables. otherwise functionality won't work."
+    echo "Please create it and populate it with needed variables."
+    echo "Otherwise system functionality won't work."
+    exit 1
+fi
+
 PORT=8989
 
 /Applications/Google\ Chrome.app/Contents/MacOS/Google\ Chrome --remote-debugging-port=$PORT --user-data-dir=$DIRTY_PATH/chrome-profile &
