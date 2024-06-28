@@ -3,8 +3,10 @@ import queue
 from .types import ReplySmiFn
 from abc import ABC, abstractmethod
 
+
 def default_reply_smi_fn(message: str) -> None:
     print(f"[DEFAULT REPLY SMI] print; msg={message}")
+
 
 class Service(ABC):
     def __init__(self):

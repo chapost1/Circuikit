@@ -9,9 +9,9 @@ class ExampleGUI:
         # Avoid opening IO descriptors or creating threads in the __init__ method
         # Instead, do it in the start method and supply it as on_start_fn to ServiceAdapter
         ...
-    
+
     def start(self) -> None:
-        print('ExampleGUI STARTED')
+        print("ExampleGUI STARTED")
         # Create it only if needed
         pass
 

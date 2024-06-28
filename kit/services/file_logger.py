@@ -14,7 +14,7 @@ class FileLogger(Service):
 
     def __destroy__(self):
         self.file_descriptor.close()
-    
+
     def start(self):
         super().start()
         # opens file desciptor only on start so class will be picklable if not started yet

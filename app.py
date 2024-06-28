@@ -20,8 +20,7 @@ if __name__ == "__main__":
 
     ex_gui = ExampleGUI()
     ex_gui_task = ServiceAdapter(
-        on_new_message_fn=ex_gui.update_screen,
-        on_start_fn=ex_gui.start
+        on_new_message_fn=ex_gui.update_screen, on_start_fn=ex_gui.start
     )
 
     tasks: list[Service] = [

@@ -102,7 +102,7 @@ class Kit:
                 serial_monitor_interface=self.serial_monitor_interface,
                 sample_rate_ms=self.sample_rate_ms,
                 readings_queue=self.readings_queue,
-                writings_queue=self.writings_queue
+                writings_queue=self.writings_queue,
             ),
             daemon=True,
         )
@@ -112,7 +112,7 @@ class Kit:
                 app_task,
                 sub_services=self.sub_services,
                 readings_queue=self.readings_queue,
-                writings_queue=self.writings_queue
+                writings_queue=self.writings_queue,
             ),
             daemon=True,
         )

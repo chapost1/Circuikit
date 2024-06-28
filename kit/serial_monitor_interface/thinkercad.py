@@ -73,6 +73,8 @@ def sample_serial_monitor(
     serial_content = driver.find_element(
         by=By.CLASS_NAME, value="code_panel__serial__content__text"
     )
+    if serial_content is None:
+        return None
     text = serial_content.get_attribute("innerHTML")
     if text is None:
         print("serial monitor text is None")
