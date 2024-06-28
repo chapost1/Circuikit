@@ -4,7 +4,7 @@ import dataclasses
 import signal
 import sys
 import time
-from app.task import Task
+from app.kit.task import Task
 
 
 def current_milli_time():
