@@ -23,7 +23,7 @@ if __name__ == "__main__":
         on_new_message_fn=ex_gui.update_screen, on_start_fn=ex_gui.start
     )
 
-    tasks: list[Service] = [
+    sub_services: list[Service] = [
         ThingsBoardGateway(token=THINGSBOARD_TOKEN),
         ex_gui_task,
         FileLogger(file_path=READINGS_FILE_LOGGER_PATH),
@@ -32,7 +32,7 @@ if __name__ == "__main__":
     kit = Kit(
         serial_monitor_interface=serial_monitor_interface,
         sample_rate_ms=SERIAL_MONITOR_SAMPLE_RATE_MS,
-        sub_services=tasks,
+        sub_services=sub_services,
     )
 
     kit.start()
