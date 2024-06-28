@@ -28,9 +28,6 @@ class QueueProtocol(Protocol):
     def put(self, obj, block: bool = True, timeout: float | None = None) -> None:
         pass
 
-    def task_done(self) -> None:
-        pass
-
 
 class Sample(TypedDict):
     time: int
@@ -116,7 +113,6 @@ def speak_with_serial_monitor(
             print("[speak_with_serial_monitor] message is none")
             continue
         send_message_fn(message)
-        messages_queue.task_done()
 
 
 class SerialMonitorInterface:

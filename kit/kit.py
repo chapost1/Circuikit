@@ -1,4 +1,4 @@
-from multiprocessing import JoinableQueue
+from multiprocessing import Queue
 from multiprocessing import Process
 import time
 from .services import Service
@@ -14,8 +14,8 @@ from .serial_monitor_interface import (
 def smi_task(
     serial_monitor_interface: ConcreteSerialMonitorInterface,
     sample_rate_ms: float,
-    readings_queue: JoinableQueue,
-    writings_queue: JoinableQueue,
+    readings_queue: Queue,
+    writings_queue: Queue,
 ):
     def on_next_read(sample: Any):  # actually a dict...
         readings_queue.put(sample)
@@ -39,8 +39,8 @@ def smi_task(
 
 def app_task(
     sub_services: list[Service],
-    readings_queue: JoinableQueue,
-    writings_queue: JoinableQueue,
+    readings_queue: Queue,
+    writings_queue: Queue,
 ):
     # process items from the queue
     def write_message_fn(message: str) -> None:
@@ -65,12 +65,6 @@ def app_task(
         for sub in sub_services:
             sub.on_new_read(new_read=sample)
 
-        # mark the unit of work as processed
-        readings_queue.task_done()
-
-    # mark the signal as processed
-    readings_queue.task_done()
-
 
 class Kit:
     __slots__ = (
@@ -89,8 +83,8 @@ class Kit:
         sample_rate_ms: float,
         sub_services: list[Service],
     ):
-        self.readings_queue = JoinableQueue()
-        self.writings_queue = JoinableQueue()
+        self.readings_queue = Queue()
+        self.writings_queue = Queue()
 
         self.serial_monitor_interface = serial_monitor_interface
         self.sample_rate_ms = sample_rate_ms
@@ -125,9 +119,6 @@ class Kit:
         self.app_process.start()
 
         self.app_process.join()
-
-        self.readings_queue.join()
-        self.writings_queue.join()
 
     def stop(self) -> None:
         if self.smi_process.is_alive():
