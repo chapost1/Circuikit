@@ -13,7 +13,7 @@ class ExampleGUI:
         ...
 
     def start(self) -> None:
-        print("ExampleGUI STARTED")
+        print("[ExampleGUI] STARTED")
         # Create it only if needed
         pass
 
