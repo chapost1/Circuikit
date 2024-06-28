@@ -1,4 +1,4 @@
-from .models import Sensors
+from app.models import Sensors
 import threading
 import queue
 from abc import ABC, abstractmethod

@@ -4,8 +4,6 @@ import time
 import threading
 import queue
 
-from dirty.env import SERIAL_MONITOR_SAMPLE_RATE_MS
-
 
 class ConcreteInterface(Protocol):
     def send_message(self, message: str) -> None:
@@ -39,6 +37,7 @@ class Sample(TypedDict):
 
 def sample_serial_monitor(
     on_new_read: Callable[[list[Sample]], None],
+    sample_rate_ms: float,
     stop_event: threading.Event,
     sample_fn: Callable[[], str | None],
 ):
@@ -52,7 +51,7 @@ def sample_serial_monitor(
             continue
         samples = extract_valid_samples(text)
         on_new_read(samples)
-        time.sleep(SERIAL_MONITOR_SAMPLE_RATE_MS / 1000)
+        time.sleep(sample_rate_ms / 1000)
 
 
 def extract_valid_samples(data: str):
@@ -77,6 +76,7 @@ def extract_valid_samples(data: str):
 def watch(
     on_next_read: Callable[[Sample], None],
     stop_event: threading.Event,
+    sample_rate_ms: float,
     sample_fn: Callable[[], str | None],
 ):
     last_sample_time = -1
@@ -96,7 +96,10 @@ def watch(
             on_next_read(sample)
 
     sample_serial_monitor(
-        on_new_read=on_new_read, stop_event=stop_event, sample_fn=sample_fn
+        on_new_read=on_new_read,
+        stop_event=stop_event,
+        sample_fn=sample_fn,
+        sample_rate_ms=sample_rate_ms,
     )
 
 
@@ -116,6 +119,7 @@ def speak_with_serial_monitor(
 
 class SerialMonitorInterface:
     __slots__ = (
+        "sample_rate_ms",
         "concrete_interface",
         "messages_to_send_queue",
         "sender_thread",
@@ -126,6 +130,7 @@ class SerialMonitorInterface:
     def __init__(
         self,
         concrete_interface: ConcreteInterface,
+        sample_rate_ms: float,
         on_next_read: Callable[[Sample], None],
         messages_to_send_queue: QueueProtocol = queue.Queue(),  # type: ignore
     ):
@@ -134,6 +139,8 @@ class SerialMonitorInterface:
         self.stop_event = threading.Event()
 
         self.concrete_interface = concrete_interface
+
+        self.sample_rate_ms = sample_rate_ms
 
         self.sender_thread = threading.Thread(
             target=speak_with_serial_monitor,
@@ -146,7 +153,12 @@ class SerialMonitorInterface:
         )
         self.watcher_thread = threading.Thread(
             target=watch,
-            args=(on_next_read, self.stop_event, self.concrete_interface.sample),
+            args=(
+                on_next_read,
+                self.stop_event,
+                self.sample_rate_ms,
+                self.concrete_interface.sample,
+            ),
             daemon=True,
         )
 

@@ -9,6 +9,7 @@ import app
 from dirty.env import (
     SELENIUM_THINKERCAD_URL,
     SELENIUM_DEBUGGER_PORT,
+    SERIAL_MONITOR_SAMPLE_RATE_MS,
 )
 
 
@@ -24,6 +25,7 @@ def smi_task(readins_queue: JoinableQueue, writings_queue: JoinableQueue):
         on_next_read=on_next_read,
         messages_to_send_queue=writings_queue,
         concrete_interface=selenium_interface,
+        sample_rate_ms=SERIAL_MONITOR_SAMPLE_RATE_MS,
     )
     # fan in - single producer
     smi.start()

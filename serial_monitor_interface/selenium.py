@@ -5,16 +5,10 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.keys import Keys
 from selenium import webdriver
 from selenium.webdriver.common.by import By
-from typing import TypedDict
 import logging
 from selenium.webdriver.remote.remote_connection import LOGGER
 
 LOGGER.setLevel(logging.WARNING)
-
-
-class Sample(TypedDict):
-    time: int
-    ...
 
 
 def open_simulation(thinkercad_url: str, debugger_port: int) -> WebDriver:

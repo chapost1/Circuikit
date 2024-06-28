@@ -1,9 +1,9 @@
-from .task import Task
-from .gui import GUI
-from .thingsboard_gateway import ThingsBoardGateway
-from .serial_monitor_callback import SerialMonitorCallback
+from app.task import Task
+from app.gui import GUI
+from app.thingsboard_gateway import ThingsBoardGateway
+from app.serial_monitor_callback import SerialMonitorCallback
 from typing import Callable
-from .models import Sensors
+from app.models import Sensors
 
 from dirty.env import (
     THINGSBOARD_TOKEN,

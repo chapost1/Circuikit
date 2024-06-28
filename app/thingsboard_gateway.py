@@ -1,10 +1,10 @@
-from .models import Sensors
+from app.models import Sensors
 import requests
 import dataclasses
 import signal
 import sys
 import time
-from .task import Task
+from app.task import Task
 
 
 def current_milli_time():

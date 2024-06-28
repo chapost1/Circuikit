@@ -1,5 +1,5 @@
-from .models import Sensors
-from .task import Task
+from app.models import Sensors
+from app.task import Task
 
 
 class GUI(Task):
