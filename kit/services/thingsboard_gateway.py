@@ -1,10 +1,9 @@
-from app.models import Sensors
 import requests
-import dataclasses
 import signal
 import sys
 import time
-from app.kit.task import Task
+from .types import ReplySmiFn
+from .service import Service
 
 
 def current_milli_time():
@@ -14,7 +13,7 @@ def current_milli_time():
 MAX_REQUESTS_PER_SECOND = 5
 
 
-class ThingsBoardGateway(Task):
+class ThingsBoardGateway(Service):
     def __init__(self, token: str):
         super().__init__()
 
@@ -29,10 +28,10 @@ class ThingsBoardGateway(Task):
         self.token = token
         self.last_request_ts_ms = -1
 
-    def on_message(self, message: Sensors) -> None:
-        self.send_request(message=message)
+    def on_message(self, message: dict, reply_smi_fn: ReplySmiFn) -> None:
+        self.send_request(json=message)
 
-    def send_request(self, message: Sensors):
+    def send_request(self, json: dict):
         now_ms = current_milli_time()
         if (now_ms - self.last_request_ts_ms) < (1000 / MAX_REQUESTS_PER_SECOND):
             print("Too many requests per second, skipping post event")
@@ -40,7 +39,7 @@ class ThingsBoardGateway(Task):
         self.last_request_ts_ms = now_ms
         response = requests.post(
             url=f"http://thingsboard.cloud/api/v1/{self.token}/telemetry",
-            json=dataclasses.asdict(message),
+            json=json,
         )
         if response.status_code > 299:
             print(

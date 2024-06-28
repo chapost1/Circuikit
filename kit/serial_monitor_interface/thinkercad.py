@@ -91,7 +91,7 @@ def speak_with_serial_monitor(driver: WebDriver, message: str) -> None:
     serial_input.send_keys(Keys.ENTER)
 
 
-class SeleniumInterface:
+class ThinkercadInterface:
     __slots__ = (
         "debugger_port",
         "thinkercad_url",

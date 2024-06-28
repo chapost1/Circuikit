@@ -4,8 +4,10 @@ import time
 import threading
 import queue
 
+MIN_SAMPLE_RATE_MS = 25
 
-class ConcreteInterface(Protocol):
+
+class ConcreteSerialMonitorInterface(Protocol):
     def send_message(self, message: str) -> None:
         pass
 
@@ -129,11 +131,15 @@ class SerialMonitorInterface:
 
     def __init__(
         self,
-        concrete_interface: ConcreteInterface,
+        concrete_interface: ConcreteSerialMonitorInterface,
         sample_rate_ms: float,
         on_next_read: Callable[[Sample], None],
         messages_to_send_queue: QueueProtocol = queue.Queue(),  # type: ignore
     ):
+        # validators
+        if sample_rate_ms < MIN_SAMPLE_RATE_MS:
+            raise ValueError(f"Minimum sample_rate_ms value is {MIN_SAMPLE_RATE_MS}")
+
         self.messages_to_send_queue = messages_to_send_queue
 
         self.stop_event = threading.Event()

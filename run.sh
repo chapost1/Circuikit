@@ -32,12 +32,20 @@ pid1=$(lsof -n -i :$PORT | grep LISTEN | grep Google | awk '{print $2}')
 
 export DEBUGGER_PORT=$PORT
 
-python3 index.py &
+PYTHON_APP_FILE_PATH=./app.py
+
+if [ ! -f $PYTHON_APP_FILE_PATH ]; then
+    echo "[ERROR] $PYTHON_APP_FILE_PATH does not exist."
+    kill -9 $pid1
+    exit 1
+fi
+
+python3 -W ignore $PYTHON_APP_FILE_PATH &
 pid2=$!
 
-trap clear SIGHUP SIGINT SIGTERM
+trap clear_processes SIGHUP SIGINT SIGTERM
 
-function clear {
+function clear_processes() {
     kill -9 $pid1
     kill -9 $pid2
     exit
