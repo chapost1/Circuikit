@@ -5,13 +5,23 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.keys import Keys
 from selenium import webdriver
 from selenium.webdriver.common.by import By
-import logging
 from selenium.webdriver.remote.remote_connection import LOGGER
+import logging
 
 LOGGER.setLevel(logging.WARNING)
+from .chrome_process import open_chrome_process
 
 
-def open_simulation(thinkercad_url: str, debugger_port: int) -> WebDriver:
+def open_simulation(
+    thinkercad_url: str,
+    debugger_port: int,
+    chrome_profile_path: str,
+    open_simulation_timeout: int,
+) -> WebDriver:
+    open_chrome_process(
+        profile_data_dir=chrome_profile_path, debugger_port=debugger_port
+    )
+
     # Specify the debugging address for the already opened Chrome browser
     debugger_address = f"localhost:{debugger_port}"
 
@@ -25,7 +35,7 @@ def open_simulation(thinkercad_url: str, debugger_port: int) -> WebDriver:
     print(f"Driver opens url={thinkercad_url}")
     driver.get(thinkercad_url)
     try:
-        WebDriverWait(driver=driver, timeout=10).until(
+        WebDriverWait(driver=driver, timeout=open_simulation_timeout).until(
             EC.presence_of_element_located((By.ID, "CODE_EDITOR_ID"))
         )
     except:
@@ -97,19 +107,32 @@ class ThinkercadInterface:
     __slots__ = (
         "debugger_port",
         "thinkercad_url",
+        "chrome_profile_path",
+        "open_simulation_timeout",
         "driver",
     )
 
-    def __init__(self, thinkercad_url: str, debugger_port: int):
+    def __init__(
+        self,
+        thinkercad_url: str,
+        chrome_profile_path: str,
+        debugger_port: int = 8989,
+        open_simulation_timeout: int = 10,
+    ):
         self.thinkercad_url = thinkercad_url
         self.debugger_port = debugger_port
+        self.chrome_profile_path = chrome_profile_path
+        self.open_simulation_timeout = open_simulation_timeout
 
     def __destroy__(self):
         self.stop()
 
     def _init_simulation(self) -> None:
         self.driver = open_simulation(
-            thinkercad_url=self.thinkercad_url, debugger_port=self.debugger_port
+            thinkercad_url=self.thinkercad_url,
+            debugger_port=self.debugger_port,
+            chrome_profile_path=self.chrome_profile_path,
+            open_simulation_timeout=self.open_simulation_timeout,
         )
         open_serial_monitor(driver=self.driver)
         start_simulation(driver=self.driver)

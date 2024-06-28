@@ -10,7 +10,8 @@ from example_gui import ExampleGUI
 
 from dirty.env import (
     THINKERCAD_URL,
-    SELENIUM_DEBUGGER_PORT,
+    THINKERCAD_CHROME_PROFILE_PATH,
+    THINKERCAD_OPEN_SIMULATION_TIMEOUT,
     SERIAL_MONITOR_SAMPLE_RATE_MS,
     THINGSBOARD_TOKEN,
     READINGS_FILE_LOGGER_PATH,
@@ -35,7 +36,9 @@ def allocate_services(send_smi_input: SendSmiInputFn) -> list[Service]:
 
 if __name__ == "__main__":
     serial_monitor_interface = ThinkercadInterface(
-        thinkercad_url=THINKERCAD_URL, debugger_port=SELENIUM_DEBUGGER_PORT
+        thinkercad_url=THINKERCAD_URL,
+        chrome_profile_path=THINKERCAD_CHROME_PROFILE_PATH,
+        open_simulation_timeout=THINKERCAD_OPEN_SIMULATION_TIMEOUT,
     )
 
     kit = Kit(
