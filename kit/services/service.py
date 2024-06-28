@@ -1,6 +1,5 @@
 import threading
 import queue
-from .types import ReplySmiFn
 from abc import ABC, abstractmethod
 
 
@@ -17,7 +16,7 @@ class Service(ABC):
             self.stop_event.set()
 
     @abstractmethod
-    def on_message(self, message: dict, reply_smi_fn: ReplySmiFn) -> None:
+    def on_message(self, message: dict) -> None:
         # Do your thing
         pass
 
@@ -31,9 +30,6 @@ class Service(ABC):
         )
         self.worker_thread.start()
 
-    def set_reply_smi_fn(self, reply_smi_fn: ReplySmiFn) -> None:
-        self.reply_smi_fn = reply_smi_fn
-
     def on_new_read(self, new_read: dict) -> None:
         self.messages_queue.put(new_read)
 
@@ -41,5 +37,5 @@ class Service(ABC):
         while not self.stop_event.is_set():
             message = self.messages_queue.get()
             if message is not None:
-                self.on_message(message=message, reply_smi_fn=self.reply_smi_fn)
+                self.on_message(message=message)
                 self.messages_queue.task_done()

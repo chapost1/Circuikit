@@ -1,28 +1,29 @@
 from multiprocessing import Queue
 from multiprocessing import Process
 import time
-from .services import Service
-from typing import Any
 from functools import partial
 
 from .serial_monitor_interface import (
     SerialMonitorInterface,
     ConcreteSerialMonitorInterface,
+    Sample,
 )
+
+from .protocols import AllocateServicesFn
 
 
 def smi_task(
     serial_monitor_interface: ConcreteSerialMonitorInterface,
     sample_rate_ms: float,
-    readings_queue: Queue,
-    writings_queue: Queue,
+    smi_output_queue: Queue,
+    smi_input_queue: Queue,
 ):
-    def on_next_read(sample: Any):  # actually a dict...
-        readings_queue.put(sample)
+    def on_next_read(sample: Sample):
+        smi_output_queue.put(sample)
 
     smi = SerialMonitorInterface(
         on_next_read=on_next_read,
-        messages_to_send_queue=writings_queue,
+        messages_to_send_queue=smi_input_queue,
         concrete_interface=serial_monitor_interface,
         sample_rate_ms=sample_rate_ms,
     )
@@ -34,28 +35,27 @@ def smi_task(
         time.sleep(60)
 
     # send a signal that no further tasks are coming
-    readings_queue.put(None)
+    smi_output_queue.put(None)
 
 
 def app_task(
-    sub_services: list[Service],
-    readings_queue: Queue,
-    writings_queue: Queue,
+    allocate_services_fn: AllocateServicesFn,
+    smi_output_queue: Queue,
+    smi_input_queue: Queue,
 ):
     # process items from the queue
     def write_message_fn(message: str) -> None:
-        writings_queue.put(message)
+        smi_input_queue.put(message)
 
-    # Set reply smi fn to already created subscribers
-    for sub in sub_services:
-        sub.set_reply_smi_fn(reply_smi_fn=write_message_fn)
+    sub_services = allocate_services_fn(send_smi_input=write_message_fn)
+
     # call each srv start method
     for sub in sub_services:
         sub.start()
 
     while True:
         # get a task from the queue
-        sample = readings_queue.get()
+        sample = smi_output_queue.get()
         # check for signal that we are done
         if sample is None:
             break
@@ -70,9 +70,9 @@ class Kit:
     __slots__ = (
         "serial_monitor_interface",
         "sample_rate_ms",
-        "sub_services",
-        "readings_queue",
-        "writings_queue",
+        "allocate_services_fn",
+        "smi_output_queue",
+        "smi_input_queue",
         "smi_process",
         "app_process",
     )
@@ -81,22 +81,22 @@ class Kit:
         self,
         serial_monitor_interface: ConcreteSerialMonitorInterface,
         sample_rate_ms: float,
-        sub_services: list[Service],
+        allocate_services_fn: AllocateServicesFn,
     ):
-        self.readings_queue = Queue()
-        self.writings_queue = Queue()
+        self.smi_output_queue = Queue()
+        self.smi_input_queue = Queue()
 
         self.serial_monitor_interface = serial_monitor_interface
         self.sample_rate_ms = sample_rate_ms
-        self.sub_services = sub_services
+        self.allocate_services_fn = allocate_services_fn
 
         self.smi_process = Process(
             target=partial(
                 smi_task,
                 serial_monitor_interface=self.serial_monitor_interface,
                 sample_rate_ms=self.sample_rate_ms,
-                readings_queue=self.readings_queue,
-                writings_queue=self.writings_queue,
+                smi_output_queue=self.smi_output_queue,
+                smi_input_queue=self.smi_input_queue,
             ),
             daemon=True,
         )
@@ -104,9 +104,9 @@ class Kit:
         self.app_process = Process(
             target=partial(
                 app_task,
-                sub_services=self.sub_services,
-                readings_queue=self.readings_queue,
-                writings_queue=self.writings_queue,
+                allocate_services_fn=self.allocate_services_fn,
+                smi_output_queue=self.smi_output_queue,
+                smi_input_queue=self.smi_input_queue,
             ),
             daemon=True,
         )
@@ -125,5 +125,5 @@ class Kit:
             self.smi_process.terminate()
         if self.app_process.is_alive():
             self.app_process.terminate()
-        self.readings_queue.close()
-        self.writings_queue.close()
+        self.smi_output_queue.close()
+        self.smi_input_queue.close()

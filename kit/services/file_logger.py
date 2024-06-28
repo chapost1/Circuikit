@@ -1,6 +1,5 @@
 from .service import Service
 from pathlib import Path
-from .types import ReplySmiFn
 import json
 import os
 
@@ -22,7 +21,7 @@ class FileLogger(Service):
         output_file.parent.mkdir(exist_ok=True, parents=True)
         self.file_descriptor = open(file=self.file_path, mode="w+")
 
-    def on_message(self, message: dict, reply_smi_fn: ReplySmiFn) -> None:
+    def on_message(self, message: dict) -> None:
         if self.file_descriptor is None:
             return
         self.file_descriptor.write(f"{json.dumps(message)}\n")

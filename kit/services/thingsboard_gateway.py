@@ -2,7 +2,6 @@ import requests
 import signal
 import sys
 import time
-from .types import ReplySmiFn
 from .service import Service
 
 
@@ -28,7 +27,7 @@ class ThingsBoardGateway(Service):
         self.token = token
         self.last_request_ts_ms = -1
 
-    def on_message(self, message: dict, reply_smi_fn: ReplySmiFn) -> None:
+    def on_message(self, message: dict) -> None:
         self.send_request(json=message)
 
     def send_request(self, json: dict):
