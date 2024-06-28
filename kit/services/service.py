@@ -8,9 +8,6 @@ def default_reply_smi_fn(message: str) -> None:
 
 
 class Service(ABC):
-    def __init__(self):
-        self.reply_smi_fn = default_reply_smi_fn
-
     def __destroy__(self):
         if self.stop_event is not None:
             self.stop_event.set()

@@ -40,7 +40,7 @@ if [ ! -f $PYTHON_APP_FILE_PATH ]; then
     exit 1
 fi
 
-python3 -W ignore $PYTHON_APP_FILE_PATH &
+python3 $PYTHON_APP_FILE_PATH &
 pid2=$!
 
 trap clear_processes SIGHUP SIGINT SIGTERM
