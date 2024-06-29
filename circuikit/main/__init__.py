@@ -10,6 +10,7 @@ from circuikit.serial_monitor_interface.types import SerialMonitorOptions, Sampl
 
 from circuikit.protocols import AllocateServicesFn
 
+__version__ = "0.1.0"
 
 def smi_task(
     serial_monitor_options: SerialMonitorOptions,
