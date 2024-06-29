@@ -3,14 +3,12 @@ from multiprocessing import Process
 import time
 from functools import partial
 
-from circuikit.serial_monitor_interface import (
+from ..serial_monitor_interface import (
     SerialMonitorInterface,
 )
-from circuikit.serial_monitor_interface.types import SerialMonitorOptions, Sample
+from ..serial_monitor_interface.types import SerialMonitorOptions, Sample
 
-from circuikit.protocols import AllocateServicesFn
-
-__version__ = "0.1.0"
+from ..protocols import AllocateServicesFn
 
 def smi_task(
     serial_monitor_options: SerialMonitorOptions,

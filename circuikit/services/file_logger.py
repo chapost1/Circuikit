@@ -1,4 +1,4 @@
-from circuikit.services.service import Service
+from .service import Service
 from pathlib import Path
 import json
 import os

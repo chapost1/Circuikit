@@ -9,7 +9,7 @@ from selenium.webdriver.remote.remote_connection import LOGGER
 import logging
 
 LOGGER.setLevel(logging.WARNING)
-from circuikit.serial_monitor_interface.chrome_process import open_chrome_process
+from .chrome_process import open_chrome_process
 
 
 def open_simulation(
