@@ -15,8 +15,8 @@ from .chrome_process import open_chrome_process
 def open_simulation(
     thinkercad_url: str,
     debugger_port: int,
-    chrome_profile_path: str,
     open_simulation_timeout: int,
+    chrome_profile_path: str | None,
 ) -> WebDriver:
     open_chrome_process(
         profile_data_dir=chrome_profile_path, debugger_port=debugger_port
@@ -115,7 +115,7 @@ class ThinkercadInterface:
     def __init__(
         self,
         thinkercad_url: str,
-        chrome_profile_path: str,
+        chrome_profile_path: str | None = None,
         debugger_port: int = 8989,
         open_simulation_timeout: int = 10,
     ):

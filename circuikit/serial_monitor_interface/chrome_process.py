@@ -19,8 +19,22 @@ def _get_chrome_application_path() -> str:
         raise NotImplementedError(f"Unsupported platform name={platform_name}")
 
 
-def open_chrome_process(profile_data_dir: str, debugger_port: int) -> None:
-    user_data_dir_absolute_path = os.path.abspath(profile_data_dir)
+def _get_user_data_dir_absolute_path(profile_data_dir: str | None) -> str:
+    if profile_data_dir is None:
+        # Use default
+        dirname = os.path.dirname(__file__)
+        dir_path = os.path.join(dirname, "__cached-chrome-profile")
+        user_data_dir_absolute_path = dir_path
+    else:
+        user_data_dir_absolute_path = profile_data_dir
+
+    return os.path.abspath(user_data_dir_absolute_path)
+
+
+def open_chrome_process(debugger_port: int, profile_data_dir: str | None) -> None:
+    user_data_dir_absolute_path = _get_user_data_dir_absolute_path(
+        profile_data_dir=profile_data_dir
+    )
     chrome_args = [
         _get_chrome_application_path(),
         f"--remote-debugging-port={debugger_port}",

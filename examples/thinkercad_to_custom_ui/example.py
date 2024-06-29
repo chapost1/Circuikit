@@ -30,7 +30,6 @@ def run_example() -> None:
     serial_monitor_options = SerialMonitorOptions(
         interface=ThinkercadInterface(
             thinkercad_url="SOME_URL",
-            chrome_profile_path="./dirty/chrome-profile",
             open_simulation_timeout=120,
         ),
         sample_rate_ms=25,
