@@ -9,13 +9,6 @@ from circuikit.protocols import (
 )
 from .example_gui import ExampleGUI
 
-from dirty.env import (
-    THINKERCAD_URL,
-    THINGSBOARD_TOKEN,
-    CHROME_PROFILE_PATH,
-    READINGS_FILE_LOGGER_PATH,
-)
-
 
 def allocate_services(send_smi_input: SendSmiInputFn) -> list[Service]:
     # initiate gui with fn to send input into smi on demand
@@ -25,19 +18,19 @@ def allocate_services(send_smi_input: SendSmiInputFn) -> list[Service]:
     )
 
     services: list[Service] = [
-        ThingsBoardGateway(token=THINGSBOARD_TOKEN),
+        ThingsBoardGateway(token=""),
         ex_gui_task,
-        FileLogger(file_path=READINGS_FILE_LOGGER_PATH),
+        FileLogger(file_path="./dirty/logs/sensors.txt"),
     ]
 
     return services
 
 
-if __name__ == "__main__":
+def run_example() -> None:
     serial_monitor_options = SerialMonitorOptions(
         interface=ThinkercadInterface(
-            thinkercad_url=THINKERCAD_URL,
-            chrome_profile_path=CHROME_PROFILE_PATH,
+            thinkercad_url="SOME_URL",
+            chrome_profile_path="./dirty/chrome-profile",
             open_simulation_timeout=120,
         ),
         sample_rate_ms=25,

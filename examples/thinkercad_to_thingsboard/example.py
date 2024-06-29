@@ -8,22 +8,20 @@ from circuikit.protocols import (
     SendSmiInputFn,
 )
 
-from dirty.env import THINKERCAD_URL, THINGSBOARD_TOKEN, CHROME_PROFILE_PATH
-
 
 def allocate_services(send_smi_input: SendSmiInputFn) -> list[Service]:
     services: list[Service] = [
-        ThingsBoardGateway(token=THINGSBOARD_TOKEN),
+        ThingsBoardGateway(token=""),
     ]
 
     return services
 
 
-if __name__ == "__main__":
+def run_example() -> None:
     serial_monitor_options = SerialMonitorOptions(
         interface=ThinkercadInterface(
-            thinkercad_url=THINKERCAD_URL,
-            chrome_profile_path=CHROME_PROFILE_PATH,
+            thinkercad_url="YOUR_URL",
+            chrome_profile_path="./dirty/chrome-profile",
             open_simulation_timeout=120,
         ),
         sample_rate_ms=25,
