@@ -45,7 +45,10 @@ class ThingsBoardGateway(Service):
                 f"[ThingsBoardGateway] failed to send; status_code={response.status_code}",
                 flush=True,
             )
-            print(response.json(), flush=True)
+            try:
+                print(response.json(), flush=True)
+            except requests.exceptions.JSONDecodeError:
+                print(response.text, flush=True)
         else:
             print(
                 f"[ThingsBoardGateway] message sent; status_code={response.status_code}",
