@@ -8,6 +8,15 @@ def default_reply_smi_fn(message: str) -> None:
 
 
 class Service(ABC):
+    def __init__(self):
+        self.messages_queue = queue.Queue()
+        self.stop_event = threading.Event()
+        self.worker_thread = threading.Thread(
+            target=self.pull_requests,
+            daemon=True,
+        )
+        self.worker_thread.start()
+
     def __destroy__(self):
         if self.stop_event is not None:
             self.stop_event.set()
@@ -16,16 +25,6 @@ class Service(ABC):
     def on_message(self, message: dict) -> None:
         # Do your thing
         pass
-
-    def start(self) -> None:
-        # Starting everything related to threading in independent methond than form __init__ so class will be picklable
-        self.messages_queue = queue.Queue()
-        self.stop_event = threading.Event()
-        self.worker_thread = threading.Thread(
-            target=self.pull_requests,
-            daemon=True,
-        )
-        self.worker_thread.start()
 
     def on_new_read(self, new_read: dict) -> None:
         self.messages_queue.put(new_read)

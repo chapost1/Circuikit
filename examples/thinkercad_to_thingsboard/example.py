@@ -4,17 +4,6 @@ from circuikit.serial_monitor_interface import (
 )
 from circuikit.serial_monitor_interface.types import SerialMonitorOptions
 from circuikit.services import Service, ThingsBoardGateway
-from circuikit.protocols import (
-    SendSmiInputFn,
-)
-
-
-def allocate_services(send_smi_input: SendSmiInputFn) -> list[Service]:
-    services: list[Service] = [
-        ThingsBoardGateway(token=""),
-    ]
-
-    return services
 
 
 def run_example() -> None:
@@ -26,9 +15,13 @@ def run_example() -> None:
         sample_rate_ms=25,
     )
 
+    services: list[Service] = [
+        ThingsBoardGateway(token=""),
+    ]
+
     kit = Circuikit(
         serial_monitor_options=serial_monitor_options,
-        allocate_services_fn=allocate_services,
+        services=services,
     )
-
-    kit.start()
+    # If there is nothing that keep the process from exit so pass block=True to the start command
+    kit.start(block=True)
