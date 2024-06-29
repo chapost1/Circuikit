@@ -5,4 +5,7 @@
 pip install git+https://github.com/chapost1/circuikit.git@v0.1.0
 ```
 
+### To run as a sandbox
+Read the [Examples readme file](./examples/readme.md)
+
 EOF

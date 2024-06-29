@@ -29,7 +29,7 @@ def allocate_services(send_smi_input: SendSmiInputFn) -> list[Service]:
 def run_example() -> None:
     serial_monitor_options = SerialMonitorOptions(
         interface=ThinkercadInterface(
-            thinkercad_url="SOME_URL",
+            thinkercad_url="http://google.com",  # Change it to something else
             open_simulation_timeout=120,
         ),
         sample_rate_ms=25,
