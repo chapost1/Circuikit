@@ -63,7 +63,7 @@ def app_task(
             sub.on_new_read(new_read=sample)
 
 
-class Kit:
+class Circuikit:
     __slots__ = (
         "serial_monitor_options",
         "allocate_services_fn",

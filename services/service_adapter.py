@@ -3,7 +3,7 @@ from typing import Callable
 
 
 class ServiceAdapter(Service):
-    """Acts as a wrapper that transmit non-task superset the sensors as it was one"""
+    """Acts as a wrapper that transmit non-service superset the sensors as it was one"""
 
     def __init__(
         self,
