@@ -6,7 +6,7 @@ setup(
     description="A versatile tool for Arduino serial monitoring and interaction",
     author="Shachar Tal",
     author_email="stalmail10@gmail.com",
-    py_modules=["circuikit"],  # Add circuikit.py here
+    packages=find_packages(include=['circuikit']),
     install_requires=[
         "anyio==4.4.0",
         "attrs==23.2.0",
