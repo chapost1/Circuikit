@@ -10,6 +10,6 @@ setup(
     description="A versatile tool for Arduino serial monitoring and interaction",
     author="Shachar Tal",
     author_email="stalmail10@gmail.com",
-    packages=find_packages(where="./circuikit"),
+    packages=find_packages(exclude=["./example"]),
     install_requires=requirements,
 )

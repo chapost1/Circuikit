@@ -10,6 +10,7 @@ from ..serial_monitor_interface.types import SerialMonitorOptions, Sample
 
 from ..protocols import AllocateServicesFn
 
+
 def smi_task(
     serial_monitor_options: SerialMonitorOptions,
     smi_output_queue: Queue,
