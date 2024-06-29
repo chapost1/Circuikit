@@ -7,6 +7,7 @@ setup(
     author="Shachar Tal",
     author_email="stalmail10@gmail.com",
     packages=find_packages(include=['services', 'serial_monitor_interface']),
+    py_modules=["circuikit", "protocols"],  # Ensure py_modules includes your top-level scripts
     install_requires=[
         "anyio==4.4.0",
         "attrs==23.2.0",
