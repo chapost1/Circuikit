@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from .protocols import ConcreteSerialMonitorInterface
+from circuikit.serial_monitor_interface.protocols import ConcreteSerialMonitorInterface
 from typing import TypedDict
 
 

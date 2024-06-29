@@ -4,8 +4,8 @@ import time
 import threading
 import queue
 from functools import partial
-from .protocols import QueueProtocol
-from .types import SerialMonitorOptions, Sample
+from circuikit.serial_monitor_interface.protocols import QueueProtocol
+from circuikit.serial_monitor_interface.types import SerialMonitorOptions, Sample
 
 MIN_SAMPLE_RATE_MS = 25
 

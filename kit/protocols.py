@@ -1,5 +1,5 @@
 from typing import Protocol
-from .services import Service
+from circuikit.services import Service
 
 
 class SendSmiInputFn(Protocol):

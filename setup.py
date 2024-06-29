@@ -6,8 +6,7 @@ setup(
     description="A versatile tool for Arduino serial monitoring and interaction",
     author="Shachar Tal",
     author_email="stalmail10@gmail.com",
-    packages=find_packages(include=['services', 'serial_monitor_interface']),
-    py_modules=["circuikit", "protocols"],  # Ensure py_modules includes your top-level scripts
+    packages=find_packages(include=['kit', 'services', 'serial_monitor_interface']),
     install_requires=[
         "anyio==4.4.0",
         "attrs==23.2.0",

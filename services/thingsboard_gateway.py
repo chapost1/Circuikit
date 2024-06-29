@@ -2,7 +2,7 @@ import requests
 import signal
 import sys
 import time
-from .service import Service
+from circuikit.services.service import Service
 
 
 def current_milli_time():

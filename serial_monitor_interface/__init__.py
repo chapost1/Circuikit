@@ -1,4 +1,4 @@
-from .serial_monitor_interface import (
+from circuikit.serial_monitor_interface.serial_monitor_interface import (
     SerialMonitorInterface,
 )
-from .thinkercad import ThinkercadInterface
+from circuikit.serial_monitor_interface.thinkercad import ThinkercadInterface
