@@ -8,7 +8,7 @@ from circuikit.serial_monitor_interface import (
 )
 from circuikit.serial_monitor_interface.types import SerialMonitorOptions, Sample
 
-from circuikit.kit.protocols import AllocateServicesFn
+from circuikit.protocols import AllocateServicesFn
 
 
 def smi_task(

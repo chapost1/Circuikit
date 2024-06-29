@@ -6,7 +6,7 @@ setup(
     description="A versatile tool for Arduino serial monitoring and interaction",
     author="Shachar Tal",
     author_email="stalmail10@gmail.com",
-    packages=find_packages(),
+    packages=find_packages(where="./circuikit"),
     install_requires=[
         "anyio==4.4.0",
         "attrs==23.2.0",
@@ -31,9 +31,9 @@ setup(
         "trio-websocket==0.11.1",
         "typing_extensions==4.12.2",
         "urllib3==2.2.2",
-        "wsproto==1.2.0"
+        "wsproto==1.2.0",
     ],
     entry_points={
-        'console_scripts': [],
+        "console_scripts": [],
     },
 )
