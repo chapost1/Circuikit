@@ -2,6 +2,7 @@ from kit import Kit
 from kit.serial_monitor_interface import (
     ThinkercadInterface,
 )
+from kit.serial_monitor_interface.types import SerialMonitorOptions
 from kit.services import Service, ServiceAdapter, ThingsBoardGateway, FileLogger
 from kit.protocols import (
     SendSmiInputFn,
@@ -35,15 +36,17 @@ def allocate_services(send_smi_input: SendSmiInputFn) -> list[Service]:
 
 
 if __name__ == "__main__":
-    serial_monitor_interface = ThinkercadInterface(
-        thinkercad_url=THINKERCAD_URL,
-        chrome_profile_path=THINKERCAD_CHROME_PROFILE_PATH,
-        open_simulation_timeout=THINKERCAD_OPEN_SIMULATION_TIMEOUT,
+    serial_monitor_options = SerialMonitorOptions(
+        interface=ThinkercadInterface(
+            thinkercad_url=THINKERCAD_URL,
+            chrome_profile_path=THINKERCAD_CHROME_PROFILE_PATH,
+            open_simulation_timeout=THINKERCAD_OPEN_SIMULATION_TIMEOUT,
+        ),
+        sample_rate_ms=SERIAL_MONITOR_SAMPLE_RATE_MS,
     )
 
     kit = Kit(
-        serial_monitor_interface=serial_monitor_interface,
-        sample_rate_ms=SERIAL_MONITOR_SAMPLE_RATE_MS,
+        serial_monitor_options=serial_monitor_options,
         allocate_services_fn=allocate_services,
     )
 

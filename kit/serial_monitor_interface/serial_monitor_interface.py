@@ -1,37 +1,13 @@
 import json
-from typing import Callable, TypedDict, Protocol
+from typing import Callable
 import time
 import threading
 import queue
+from functools import partial
+from .protocols import QueueProtocol
+from .types import SerialMonitorOptions, Sample
 
 MIN_SAMPLE_RATE_MS = 25
-
-
-class ConcreteSerialMonitorInterface(Protocol):
-    def send_message(self, message: str) -> None:
-        pass
-
-    def sample(self) -> str | None:
-        pass
-
-    def start(self) -> None:
-        pass
-
-    def stop(self) -> None:
-        pass
-
-
-class QueueProtocol(Protocol):
-    def get(self):
-        pass
-
-    def put(self, obj, block: bool = True, timeout: float | None = None) -> None:
-        pass
-
-
-class Sample(TypedDict):
-    time: int
-    ...
 
 
 def sample_serial_monitor(
@@ -117,8 +93,7 @@ def speak_with_serial_monitor(
 
 class SerialMonitorInterface:
     __slots__ = (
-        "sample_rate_ms",
-        "concrete_interface",
+        "options",
         "messages_to_send_queue",
         "sender_thread",
         "watcher_thread",
@@ -127,39 +102,32 @@ class SerialMonitorInterface:
 
     def __init__(
         self,
-        concrete_interface: ConcreteSerialMonitorInterface,
-        sample_rate_ms: float,
+        options: SerialMonitorOptions,
         on_next_read: Callable[[Sample], None],
         messages_to_send_queue: QueueProtocol = queue.Queue(),  # type: ignore
     ):
-        # validators
-        if sample_rate_ms < MIN_SAMPLE_RATE_MS:
-            raise ValueError(f"Minimum sample_rate_ms value is {MIN_SAMPLE_RATE_MS}")
-
         self.messages_to_send_queue = messages_to_send_queue
 
         self.stop_event = threading.Event()
 
-        self.concrete_interface = concrete_interface
-
-        self.sample_rate_ms = sample_rate_ms
+        self.options = options
 
         self.sender_thread = threading.Thread(
-            target=speak_with_serial_monitor,
-            args=(
-                self.messages_to_send_queue,
-                self.stop_event,
-                self.concrete_interface.send_message,
+            target=partial(
+                speak_with_serial_monitor,
+                messages_queue=self.messages_to_send_queue,
+                stop_event=self.stop_event,
+                send_message_fn=self.options.interface.send_message,
             ),
             daemon=True,
         )
         self.watcher_thread = threading.Thread(
-            target=watch,
-            args=(
-                on_next_read,
-                self.stop_event,
-                self.sample_rate_ms,
-                self.concrete_interface.sample,
+            target=partial(
+                watch,
+                on_next_read=on_next_read,
+                stop_event=self.stop_event,
+                sample_rate_ms=self.options.sample_rate_ms,
+                sample_fn=self.options.interface.sample,
             ),
             daemon=True,
         )
@@ -171,11 +139,11 @@ class SerialMonitorInterface:
         self.messages_to_send_queue.put(message)
 
     def start(self) -> None:
-        self.concrete_interface.start()
+        self.options.interface.start()
         self.sender_thread.start()
         self.watcher_thread.start()
 
     def stop(self) -> None:
         if self.sender_thread.is_alive():
             self.stop_event.set()
-        self.concrete_interface.stop()
+        self.options.interface.stop()

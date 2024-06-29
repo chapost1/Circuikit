@@ -21,14 +21,14 @@ def _get_chrome_application_path() -> str:
 
 def open_chrome_process(profile_data_dir: str, debugger_port: int) -> None:
     user_data_dir_absolute_path = os.path.abspath(profile_data_dir)
-    CHROME_ARGS = [
+    chrome_args = [
         _get_chrome_application_path(),
         f"--remote-debugging-port={debugger_port}",
         f"--user-data-dir={user_data_dir_absolute_path}",
     ]
 
     # Start Chrome process
-    chrome_process = subprocess.Popen(CHROME_ARGS)
+    chrome_process = subprocess.Popen(args=chrome_args)
 
     # Register a cleanup function to kill Chrome when Python script exits
     def cleanup():

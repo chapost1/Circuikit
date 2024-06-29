@@ -5,16 +5,14 @@ from functools import partial
 
 from .serial_monitor_interface import (
     SerialMonitorInterface,
-    ConcreteSerialMonitorInterface,
-    Sample,
 )
+from .serial_monitor_interface.types import SerialMonitorOptions, Sample
 
 from .protocols import AllocateServicesFn
 
 
 def smi_task(
-    serial_monitor_interface: ConcreteSerialMonitorInterface,
-    sample_rate_ms: float,
+    serial_monitor_options: SerialMonitorOptions,
     smi_output_queue: Queue,
     smi_input_queue: Queue,
 ):
@@ -24,8 +22,7 @@ def smi_task(
     smi = SerialMonitorInterface(
         on_next_read=on_next_read,
         messages_to_send_queue=smi_input_queue,
-        concrete_interface=serial_monitor_interface,
-        sample_rate_ms=sample_rate_ms,
+        options=serial_monitor_options,
     )
     # fan in - single producer
     smi.start()
@@ -68,8 +65,7 @@ def app_task(
 
 class Kit:
     __slots__ = (
-        "serial_monitor_interface",
-        "sample_rate_ms",
+        "serial_monitor_options",
         "allocate_services_fn",
         "smi_output_queue",
         "smi_input_queue",
@@ -79,22 +75,19 @@ class Kit:
 
     def __init__(
         self,
-        serial_monitor_interface: ConcreteSerialMonitorInterface,
-        sample_rate_ms: float,
+        serial_monitor_options: SerialMonitorOptions,
         allocate_services_fn: AllocateServicesFn,
     ):
         self.smi_output_queue = Queue()
         self.smi_input_queue = Queue()
 
-        self.serial_monitor_interface = serial_monitor_interface
-        self.sample_rate_ms = sample_rate_ms
+        self.serial_monitor_options = serial_monitor_options
         self.allocate_services_fn = allocate_services_fn
 
         self.smi_process = Process(
             target=partial(
                 smi_task,
-                serial_monitor_interface=self.serial_monitor_interface,
-                sample_rate_ms=self.sample_rate_ms,
+                serial_monitor_options=self.serial_monitor_options,
                 smi_output_queue=self.smi_output_queue,
                 smi_input_queue=self.smi_input_queue,
             ),
