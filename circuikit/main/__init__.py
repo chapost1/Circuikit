@@ -100,9 +100,9 @@ class Circuikit:
         # Graceful cleanup function
         def cleanup():
             try:
-                print("circuikit cleanup stat")
+                print("circuikit cleanup start")
                 self.stop()
-                print("circuikit cleanup stat")
+                print("circuikit cleanup end")
             except Exception as e:
                 print(f"circuikit cleanup error: {e}")
 
