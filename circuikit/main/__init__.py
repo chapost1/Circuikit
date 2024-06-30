@@ -3,6 +3,8 @@ from multiprocessing import Process
 import time
 from functools import partial
 import threading
+import signal
+import sys
 
 from ..services import Service
 from ..serial_monitor_interface import (
@@ -94,6 +96,24 @@ class Circuikit:
             ),
             daemon=True,
         )
+
+        # Graceful cleanup function
+        def cleanup():
+            try:
+                print("circuikit cleanup stat")
+                self.stop()
+                print("circuikit cleanup stat")
+            except Exception as e:
+                print(f"circuikit cleanup error: {e}")
+
+        # atexit.register(cleanup)
+        def sig_handler(sig, frame):
+            print("Caught signal:", sig)
+            cleanup()
+            sys.exit(0)
+
+        signal.signal(signal.SIGTERM, sig_handler)
+        signal.signal(signal.SIGINT, sig_handler)
 
     def __destroy__(self):
         self.stop()
