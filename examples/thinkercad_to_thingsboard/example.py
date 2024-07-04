@@ -8,6 +8,7 @@ from circuikit.services import Service, ThingsBoardGateway
 
 def run_example() -> None:
     serial_monitor_options = SerialMonitorOptions(
+        timestamp_field_name="timestamp_ms",  # you can select your own expected JSON timestamp field. default is 'time'
         interface=ThinkercadInterface(
             thinkercad_url="https://google.com",  # Change it to something else
             open_simulation_timeout=120,

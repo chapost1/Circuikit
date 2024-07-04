@@ -2,16 +2,16 @@ import json
 from typing import Callable
 import time
 import threading
-import queue
 from functools import partial
 from .protocols import QueueProtocol
-from .types import SerialMonitorOptions, Sample
+from .types import SerialMonitorOptions
 
 MIN_SAMPLE_RATE_MS = 25
 
 
 def sample_serial_monitor(
-    on_new_read: Callable[[list[Sample]], None],
+    on_new_read: Callable[[list[dict]], None],
+    timestamp_field_name: str,
     sample_rate_ms: float,
     stop_event: threading.Event,
     sample_fn: Callable[[], str | None],
@@ -24,54 +24,60 @@ def sample_serial_monitor(
         if text is None:
             print("serial monitor text is None")
             continue
-        samples = extract_valid_samples(text)
+        samples = extract_valid_samples(
+            data=text, timestamp_field_name=timestamp_field_name
+        )
         on_new_read(samples)
         time.sleep(sample_rate_ms / 1000)
 
 
-def extract_valid_samples(data: str):
-    samples: list[Sample] = []
+def extract_valid_samples(data: str, timestamp_field_name: str):
+    samples: list[dict] = []
     lines = data.split("\n")
     for line in lines:
         try:
-            sample: Sample = json.loads(line)
+            sample: dict = json.loads(line)
             if not isinstance(sample, dict):
                 continue
-            if not "time" in sample:
-                print(f"sample={sample} has no .time key, skipping...")
+            if not timestamp_field_name in sample:
+                print(
+                    f"sample={sample} has no timestamp_field_name={timestamp_field_name} key, skipping..."
+                )
                 continue
             samples.append(sample)
         except ValueError:
             # print(f'faled to load incomplete line={line}')
-            # that's expected...
+            # that's expected in case of not a JSON...
             pass
     return samples
 
 
 def watch(
-    on_next_read: Callable[[Sample], None],
+    on_next_read: Callable[[dict], None],
     stop_event: threading.Event,
     sample_rate_ms: float,
     sample_fn: Callable[[], str | None],
+    timestamp_field_name: str,
 ):
     last_sample_time = -1
 
-    def on_new_read(new_samples: list[Sample]):
+    def on_new_read(new_samples: list[dict]):
         nonlocal last_sample_time
-        delta_samples: list[Sample] = []
+        delta_samples: list[dict] = []
         if len(new_samples) == 0:
             return
         for sample in new_samples:
-            if sample["time"] > last_sample_time:
+            if sample[timestamp_field_name] > last_sample_time:
                 delta_samples.append(sample)
 
-        last_sample_time = new_samples[-1]["time"]
+        last_sample_time = new_samples[-1][timestamp_field_name]
 
         for sample in delta_samples:
             on_next_read(sample)
 
     sample_serial_monitor(
         on_new_read=on_new_read,
+        timestamp_field_name=timestamp_field_name,
         stop_event=stop_event,
         sample_fn=sample_fn,
         sample_rate_ms=sample_rate_ms,
@@ -103,8 +109,8 @@ class SerialMonitorInterface:
     def __init__(
         self,
         options: SerialMonitorOptions,
-        on_next_read: Callable[[Sample], None],
-        messages_to_send_queue: QueueProtocol = queue.Queue(),  # type: ignore
+        on_next_read: Callable[[dict], None],
+        messages_to_send_queue: QueueProtocol,
     ):
         self.messages_to_send_queue = messages_to_send_queue
 
@@ -126,6 +132,7 @@ class SerialMonitorInterface:
                 watch,
                 on_next_read=on_next_read,
                 stop_event=self.stop_event,
+                timestamp_field_name=self.options.timestamp_field_name,
                 sample_rate_ms=self.options.sample_rate_ms,
                 sample_fn=self.options.interface.sample,
             ),

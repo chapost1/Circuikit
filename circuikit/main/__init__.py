@@ -10,7 +10,7 @@ from ..services import Service
 from ..serial_monitor_interface import (
     SerialMonitorInterface,
 )
-from ..serial_monitor_interface.types import SerialMonitorOptions, Sample
+from ..serial_monitor_interface.types import SerialMonitorOptions
 
 
 def smi_task(
@@ -18,7 +18,7 @@ def smi_task(
     smi_output_queue: Queue,
     smi_input_queue: Queue,
 ):
-    def on_next_read(sample: Sample):
+    def on_next_read(sample: dict):
         smi_output_queue.put(sample)
 
     smi = SerialMonitorInterface(
