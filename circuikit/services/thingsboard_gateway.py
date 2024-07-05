@@ -3,6 +3,9 @@ import signal
 import sys
 import time
 from .service import Service
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 def current_milli_time():
@@ -19,7 +22,7 @@ class ThingsBoardGateway(Service):
         # IO libraries are tricky to handle on sigint
         # So we make sure we kill it
         def signal_handler(sig, frame):
-            print("SIGINT received, exiting gracefully...")
+            logger.debug("[ThingsBoardGateway] signign received, exiting gracefully...")
             sys.exit(0)
 
         signal.signal(signal.SIGINT, signal_handler)
@@ -33,7 +36,9 @@ class ThingsBoardGateway(Service):
     def send_request(self, json: dict):
         now_ms = current_milli_time()
         if (now_ms - self.last_request_ts_ms) < (1000 / MAX_REQUESTS_PER_SECOND):
-            print("Too many requests per second, skipping post event")
+            logger.warning(
+                "[ThingsBoardGateway] Too many requests per second, skipping post event"
+            )
             return
         self.last_request_ts_ms = now_ms
         response = requests.post(
@@ -41,16 +46,14 @@ class ThingsBoardGateway(Service):
             json=json,
         )
         if response.status_code > 299:
-            print(
-                f"[ThingsBoardGateway] failed to send; status_code={response.status_code}",
-                flush=True,
+            logger.error(
+                f"[ThingsBoardGateway] failed to send; status_code={response.status_code}"
             )
             try:
-                print(response.json(), flush=True)
+                logger.debug(f"[ThingsBoardGateway] response={response.json()}")
             except requests.exceptions.JSONDecodeError:
-                print(response.text, flush=True)
+                logger.error(f"[ThingsBoardGateway] response={response.text}")
         else:
-            print(
-                f"[ThingsBoardGateway] message sent; status_code={response.status_code}",
-                flush=True,
+            logger.debug(
+                f"[ThingsBoardGateway] message sent; status_code={response.status_code}"
             )

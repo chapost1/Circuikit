@@ -5,11 +5,10 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.keys import Keys
 from selenium import webdriver
 from selenium.webdriver.common.by import By
-from selenium.webdriver.remote.remote_connection import LOGGER
+from .chrome_process import open_chrome_process
 import logging
 
-LOGGER.setLevel(logging.WARNING)
-from .chrome_process import open_chrome_process
+logger = logging.getLogger(__name__)
 
 
 def open_simulation(
@@ -32,14 +31,16 @@ def open_simulation(
     # Initialize the WebDriver with the existing Chrome instance
     driver = webdriver.Chrome(options=chrome_options)
     # Now, you can interact with the already opened Chrome browser
-    print(f"Driver opens url={thinkercad_url}")
+    logger.info(f"Driver opens {thinkercad_url=}")
     driver.get(thinkercad_url)
     try:
         WebDriverWait(driver=driver, timeout=open_simulation_timeout).until(
             EC.presence_of_element_located((By.ID, "CODE_EDITOR_ID"))
         )
     except:
-        print("Failed to load page in specified timeout due to indicator")
+        logger.error(
+            "Failed to get loaded thinkercad page indicator in specified timeout"
+        )
         driver.quit()
         exit(1)
     return driver
@@ -87,7 +88,7 @@ def sample_serial_monitor(
         return None
     text = serial_content.get_attribute("innerHTML")
     if text is None:
-        print("serial monitor text is None")
+        logger.warning("Thinkercad serial monitor text html element attr is None")
         return None
     return text
 
@@ -97,7 +98,7 @@ def speak_with_serial_monitor(driver: WebDriver, message: str) -> None:
         by=By.CLASS_NAME, value="code_panel__serial__input"
     )
     if serial_input is None:
-        print("[ERROR] cannot find serial input")
+        logger.error("Cannot find thinkercad serial monitor input")
         return
     serial_input.send_keys(message)
     serial_input.send_keys(Keys.ENTER)
@@ -140,13 +141,17 @@ class ThinkercadInterface:
 
     def send_message(self, message: str) -> None:
         if self.driver is None:
-            print("[SeleniumInterface] Driver is not running. send_message is rejected")
+            logger.warning(
+                "Tried to send message to thinkercad smi while driver is not runnint"
+            )
             return
         speak_with_serial_monitor(driver=self.driver, message=message)
 
     def sample(self) -> str | None:
         if self.driver is None:
-            print("[SeleniumInterface] Driver is not running. send_message is rejected")
+            logger.warning(
+                "Tried to send message to thinkercad smi while driver is not runnint"
+            )
             return
         return sample_serial_monitor(driver=self.driver)
 

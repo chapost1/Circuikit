@@ -5,6 +5,9 @@ import threading
 from functools import partial
 from .protocols import QueueProtocol
 from .types import SerialMonitorOptions
+import logging
+
+logger = logging.getLogger(__name__)
 
 MIN_SAMPLE_RATE_MS = 25
 
@@ -22,7 +25,9 @@ def sample_serial_monitor(
     while not stop_event.is_set():
         text = sample_fn()
         if text is None:
-            print("serial monitor text is None")
+            logger.warning(
+                "Sampled serial monitor output, but received None as a response"
+            )
             continue
         samples = extract_valid_samples(
             data=text, timestamp_field_name=timestamp_field_name
@@ -40,14 +45,14 @@ def extract_valid_samples(data: str, timestamp_field_name: str):
             if not isinstance(sample, dict):
                 continue
             if not timestamp_field_name in sample:
-                print(
-                    f"sample={sample} has no timestamp_field_name={timestamp_field_name} key, skipping..."
+                logger.warning(
+                    f"{sample=} has no {timestamp_field_name=} key, skipping..."
                 )
                 continue
             samples.append(sample)
         except ValueError:
-            # print(f'faled to load incomplete line={line}')
-            # that's expected in case of not a JSON...
+            logger.debug(f"failed to load incomplete JSON {line=}")
+            # that's expected in case of not a JSON or if sample taken during output is in progress...
             pass
     return samples
 
@@ -92,7 +97,7 @@ def speak_with_serial_monitor(
     while not stop_event.is_set():
         message = messages_queue.get()
         if message is None:
-            print("[speak_with_serial_monitor] message is none")
+            logger.warning(f"[speak_with_serial_monitor fn] enqueued message is None")
             continue
         send_message_fn(message)
 

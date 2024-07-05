@@ -4,6 +4,9 @@ import sys
 import os
 import atexit
 import platform
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 def _get_chrome_application_path() -> str:
@@ -50,7 +53,7 @@ def open_chrome_process(debugger_port: int, profile_data_dir: str | None) -> Non
             chrome_process.terminate()  # Use terminate() for both Windows and Unix-like systems
             chrome_process.wait(timeout=5)
         except Exception as e:
-            print(f"Error terminating Chrome: {e}")
+            logger.error(f"Error terminating Chrome process: {e}")
 
     atexit.register(cleanup)
 

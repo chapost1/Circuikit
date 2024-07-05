@@ -1,10 +1,9 @@
 import threading
 import queue
 from abc import ABC, abstractmethod
+import logging
 
-
-def default_reply_smi_fn(message: str) -> None:
-    print(f"[DEFAULT REPLY SMI] print; msg={message}")
+logger = logging.getLogger(__name__)
 
 
 class Service(ABC):

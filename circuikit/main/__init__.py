@@ -12,6 +12,10 @@ from ..serial_monitor_interface import (
 )
 from ..serial_monitor_interface.types import SerialMonitorOptions
 
+import logging
+
+logger = logging.getLogger(__name__)
+
 
 def smi_task(
     serial_monitor_options: SerialMonitorOptions,
@@ -47,7 +51,7 @@ def app_task(
         if sample is None:
             break
         # process
-        print(f"Fanning out new_read={sample}", flush=True)
+        logger.debug(f"Fanning out smi {sample=}")
 
         for sub in services:
             sub.on_new_read(new_read=sample)
@@ -100,15 +104,16 @@ class Circuikit:
         # Graceful cleanup function
         def cleanup():
             try:
-                print("circuikit cleanup start")
+                logger.debug("Circuikit cleanup start")
                 self.stop()
-                print("circuikit cleanup end")
+                logger.debug("Circuikit cleanup end")
             except Exception as e:
-                print(f"circuikit cleanup error: {e}")
+                logger.error(f"circuikit cleanup error: {e}")
+                raise e
 
         # atexit.register(cleanup)
         def sig_handler(sig, frame):
-            print("Caught signal:", sig)
+            logger.debug(f"Circuikit caught {sig=}")
             cleanup()
             sys.exit(0)
 
