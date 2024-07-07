@@ -6,7 +6,7 @@ with open("requirements.txt", "r", encoding="utf-8") as fh:
 
 setup(
     name="circuikit",
-    version="0.3.4",
+    version="0.3.5",
     description="A versatile tool for Arduino serial monitoring and interaction",
     author="Shachar Tal",
     author_email="stalmail10@gmail.com",

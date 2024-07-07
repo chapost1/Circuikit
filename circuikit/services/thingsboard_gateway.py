@@ -1,6 +1,4 @@
 import requests
-import signal
-import sys
 import time
 from .service import Service
 import logging
@@ -19,14 +17,6 @@ class ThingsBoardGateway(Service):
     def __init__(self, token: str):
         super().__init__()
 
-        # IO libraries are tricky to handle on sigint
-        # So we make sure we kill it
-        def signal_handler(sig, frame):
-            logger.debug("[ThingsBoardGateway] signign received, exiting gracefully...")
-            sys.exit(0)
-
-        signal.signal(signal.SIGINT, signal_handler)
-
         self.token = token
         self.last_request_ts_ms = -1
 
@@ -36,9 +26,7 @@ class ThingsBoardGateway(Service):
     def send_request(self, json: dict):
         now_ms = current_milli_time()
         if (now_ms - self.last_request_ts_ms) < (1000 / MAX_REQUESTS_PER_SECOND):
-            logger.warning(
-                "[ThingsBoardGateway] Too many requests per second, skipping post event"
-            )
+            logger.warning("Too many requests per second, skipping post event")
             return
         self.last_request_ts_ms = now_ms
         response = requests.post(
@@ -46,14 +34,10 @@ class ThingsBoardGateway(Service):
             json=json,
         )
         if response.status_code > 299:
-            logger.error(
-                f"[ThingsBoardGateway] failed to send; status_code={response.status_code}"
-            )
+            logger.error(f"failed to send; status_code={response.status_code}")
             try:
-                logger.debug(f"[ThingsBoardGateway] response={response.json()}")
+                logger.debug(f"response={response.json()}")
             except requests.exceptions.JSONDecodeError:
-                logger.error(f"[ThingsBoardGateway] response={response.text}")
+                logger.error(f"response={response.text}")
         else:
-            logger.debug(
-                f"[ThingsBoardGateway] message sent; status_code={response.status_code}"
-            )
+            logger.debug(f"message sent; status_code={response.status_code}")

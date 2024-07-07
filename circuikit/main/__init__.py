@@ -108,7 +108,7 @@ class Circuikit:
                 self.stop()
                 logger.debug("Circuikit cleanup end")
             except Exception as e:
-                logger.error(f"circuikit cleanup error: {e}")
+                logger.error(f"Circuikit cleanup error: {e}")
                 raise e
 
         # atexit.register(cleanup)
