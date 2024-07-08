@@ -1,4 +1,4 @@
-# Circuikit
+# ⚙️ Circuikit
 
 ![Python](https://img.shields.io/badge/python-3.10%2B-purple)
 ![LTS](https://img.shields.io/badge/LTS-v0.3.5-blue)
