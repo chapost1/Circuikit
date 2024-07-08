@@ -12,10 +12,7 @@ Circuikit is a Python package designed to facilitate communication between Pytho
 
 - [Overview](#overview)
 - [Installation](#installation)
-- [Quick Start](#quick-start)
-  - [Basic Example](#basic-example)
-  - [Radar Example](#radar-example)
-- [Detailed Documentation](#detailed-documentation)
+- [Documentation](#documentation)
   - [`Circuikit` Class](#circuikit-class)
   - [`SerialMonitorInterface` Class](#serialmonitorinterface-class)
   - [`SerialMonitorOptions` Class](#serialmonitoroptions-class)
@@ -33,9 +30,10 @@ Circuikit is a Python package designed to facilitate communication between Pytho
   - [Example Usage](#example-usage)
   - [Important Notes](#important-notes)
 - [Contributing](#contributing)
+  - [How to run as a sandbox](#how-to-run-as-a-sandbox)
+  - [Instructions](#instructions)
   - [Adding New Built-in Services](#adding-new-built-in-services)
   - [Adding New Built-in Serial Monitor Interfaces](#adding-new-built-in-serial-monitor-interfaces)
-  - [To run as a sandbox](#to-run-as-a-sandbox)
 - [License](#license)
 - [Contact](#contact)
 
@@ -48,108 +46,7 @@ To install Circuikit, use pip:
 pip install git+https://github.com/chapost1/Circuikit.git@v0.3.5
 ```
 
-## Quick Start
-
-### Basic Example
-
-Here is a basic example of how to connect a Thinkercad project to ThingsBoard:
-
-```python
-from circuikit import Circuikit
-from circuikit.serial_monitor_interface import ThinkercadInterface
-from circuikit.serial_monitor_interface.types import SerialMonitorOptions
-from circuikit.services import Service, ThingsBoardGateway
-
-def run_example() -> None:
-    serial_monitor_options = SerialMonitorOptions(
-        timestamp_field_name="timestamp_ms",  # Default is 'time'
-        interface=ThinkercadInterface(
-            thinkercad_url="https://google.com",  # Change to your Thinkercad URL
-            open_simulation_timeout=120,
-        ),
-        sample_rate_ms=25,
-    )
-
-    services: list[Service] = [
-        ThingsBoardGateway(token="YOUR_THINGSBOARD_TOKEN"),
-    ]
-
-    kit = Circuikit(
-        serial_monitor_options=serial_monitor_options,
-        services=services,
-    )
-    kit.start(block=True)
-
-if __name__ == "__main__":
-    run_example()
-```
-
-### Radar Example
-
-This example demonstrates creating a radar system using multiple ultrasonic sensors and a servo motor. Note that this is just an example, and you can build various projects using Circuikit.
-
-```python
-from circuikit import Circuikit
-from circuikit.serial_monitor_interface import ThinkercadInterface
-from circuikit.serial_monitor_interface.types import SerialMonitorOptions
-from circuikit.services import Service, ServiceAdapter
-import services.notifier as notifier
-import services.radar as radar
-from utils import osx
-from functools import partial
-from models import Sensors
-import logging
-
-logging.basicConfig(level=logging.INFO)
-
-from dirty.env import (
-    THINKERCAD_URL,
-    THINKERCAD_OPEN_SIMULATION_TIMEOUT,
-    SERIAL_MONITOR_SAMPLE_RATE_MS,
-    SMS_DESTINATION_PHONE_NUMBER,
-)
-
-if __name__ == "__main__":
-    serial_monitor_options = SerialMonitorOptions(
-        timestamp_field_name=Sensors.get_time_field_name(),
-        interface=ThinkercadInterface(
-            thinkercad_url=THINKERCAD_URL,
-            open_simulation_timeout=THINKERCAD_OPEN_SIMULATION_TIMEOUT,
-        ),
-        sample_rate_ms=SERIAL_MONITOR_SAMPLE_RATE_MS,
-    )
-
-    radar_gui = radar.RadarGUI()
-
-    alert_manager = notifier.AlertManager(
-        notification_channels=[
-            notifier.NotificationChannel(
-                notify_fn=partial(
-                    osx.send_sms, phone_number=SMS_DESTINATION_PHONE_NUMBER
-                )
-            )
-        ]
-    )
-
-    radar_service = radar.Radar(
-        emit_state_fns=[radar_gui.on_new_data],
-        detect_objects_fn=radar.detect_objects,
-        alert_fn=alert_manager.on_new_alert,
-    )
-
-    services: list[Service] = [
-        ServiceAdapter(on_new_message_fn=radar_service.on_new_sensors),
-    ]
-
-    kit = Circuikit(
-        serial_monitor_options=serial_monitor_options,
-        services=services,
-    )
-    kit.start(block=False)
-    radar_gui.start_mainloop()
-```
-
-## Detailed Documentation
+## Documentation
 
 ### `Circuikit` Class
 
@@ -357,6 +254,11 @@ By using the `ThinkercadInterface`, you can simulate your projects in Thinkercad
 
 ## Contributing
 
+### How to run as a sandbox
+Read the [Examples readme file](./examples/readme.md)
+
+### Instructions
+
 We welcome contributions to Circuikit! If you would like to contribute, please follow these guidelines:
 
 1. **Fork the Repository**: Start by forking the repository to your GitHub account.
@@ -378,9 +280,6 @@ We are particularly interested in contributions that add new built-in services t
 You can also contribute by adding new built-in Serial Monitor Interfaces (SMI). Currently, Circuikit utilizes a Thinkercad interface that uses Chrome for interaction. If you can provide support for additional browsers or different simulation environments, your contributions are welcome!
 
 Thank you for your interest in contributing to Circuikit! We appreciate your efforts in helping us improve and expand the capabilities of this project.
-
-### To run as a sandbox
-Read the [Examples readme file](./examples/readme.md)
 
 ## License
 
