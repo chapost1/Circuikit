@@ -277,7 +277,7 @@ We are particularly interested in contributions that add new built-in services t
 
 ### Adding New Built-in Serial Monitor Interfaces
 
-You can also contribute by adding new built-in Serial Monitor Interfaces (SMI). Currently, Circuikit utilizes a Thinkercad interface that uses Chrome for interaction. If you can provide support for additional browsers or different simulation environments, your contributions are welcome!
+You can also contribute by adding new built-in Serial Monitor Interfaces (SMI). If you can provide support for existing interfaces such as Thinkercad to support additional browsers or entirely different simulation environments, your contributions are welcome!
 
 Thank you for your interest in contributing to Circuikit! We appreciate your efforts in helping us improve and expand the capabilities of this project.
 
