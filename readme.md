@@ -10,6 +10,9 @@ Circuikit is a Python package designed to facilitate communication between Pytho
 
 ## Table of Contents
 
+<details>
+<summary>Click to expand</summary>
+
 - [Overview](#overview)
 - [Installation](#installation)
 - [Documentation](#documentation)
@@ -37,6 +40,7 @@ Circuikit is a Python package designed to facilitate communication between Pytho
 - [License](#license)
 - [Contact](#contact)
 
+</details>
 
 ## Installation
 
