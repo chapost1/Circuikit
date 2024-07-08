@@ -8,6 +8,38 @@
 
 Circuikit is a Python package designed to facilitate communication between Python applications and Arduino hardware, supporting both simulated environments (like Thinkercad) and real hardware. It enables easy integration with various services for data processing, visualization, and alerts, providing a modular and flexible framework for embedded system projects.
 
+## Table of Contents
+
+- [Overview](#overview)
+- [Installation](#installation)
+- [Quick Start](#quick-start)
+  - [Basic Example](#basic-example)
+  - [Radar Example](#radar-example)
+- [Detailed Documentation](#detailed-documentation)
+  - [`Circuikit` Class](#circuikit-class)
+  - [`SerialMonitorInterface` Class](#serialmonitorinterface-class)
+  - [`SerialMonitorOptions` Class](#serialmonitoroptions-class)
+- [Service Integration](#service-integration)
+  - [Creating a Custom Service](#creating-a-custom-service)
+    - [`ServiceAdapter` Class](#serviceadapter-class)
+  - [Using Built-in Services](#using-built-in-services)
+    - [`ThingsBoardGateway` Class](#thingsboardgateway-class)
+    - [`FileLogger` Class](#filelogger-class)
+- [Flexible Serial Monitor Interface](#flexible-serial-monitor-interface)
+  - [`ConcreteSerialMonitorInterface` Protocol](#concreteserialmonitorinterface-protocol)
+- [ThinkercadInterface](#thinkercadinterface)
+  - [Initialization](#initialization)
+  - [Key Methods](#key-methods)
+  - [Example Usage](#example-usage)
+  - [Important Notes](#important-notes)
+- [Contributing](#contributing)
+  - [Adding New Built-in Services](#adding-new-built-in-services)
+  - [Adding New Built-in Serial Monitor Interfaces](#adding-new-built-in-serial-monitor-interfaces)
+  - [To run as a sandbox](#to-run-as-a-sandbox)
+- [License](#license)
+- [Contact](#contact)
+
+
 ## Installation
 
 To install Circuikit, use pip:
@@ -155,28 +187,38 @@ The `SerialMonitorOptions` class is used to configure the serial monitor interfa
 - `sample_rate_ms`: The sampling rate in milliseconds (must be >= 25 ms).
 - `timestamp_field_name`: The name of the timestamp field in the JSON data (default is "time").
 
-### Service Integration
+Got it! If users stitch `ServiceAdapter` to their own class functions before passing them to the service list, we can adjust the table of contents and the related sections accordingly. Here's how you can update the table of contents and the relevant sections in your README:
 
-Circuikit supports integrating various services to process the data read from the Arduino. 
+```markdown
+
+### Service Integration
 
 #### Creating a Custom Service
 
-To create a custom service, subclass the `Service` class and implement the `on_message` method.
+##### `ServiceAdapter` Class
+
+To create a custom service, define your class and use `ServiceAdapter` to stitch it to your own class functions:
 
 ```python
-from circuikit.services import Service
+from circuikit.services import ServiceAdapter
 
-class CustomService(Service):
+class CustomService:
     def on_message(self, message: dict) -> None:
         # Process the message
         print(message)
+
+# Create an instance of your custom service
+custom_service = CustomService()
+
+# Use ServiceAdapter to stitch your custom service to a function
+service_adapter = ServiceAdapter(on_new_message_fn=custom_service.on_message)
 ```
 
 #### Using Built-in Services
 
-Circuikit comes with several built-in services, such as `ThingsBoardGateway` and `FileLogger`.
+Circuikit provides built-in services that you can use for various purposes:
 
-**ThingsBoardGateway**
+##### `ThingsBoardGateway` Class
 
 A service for sending data to ThingsBoard.
 
@@ -190,7 +232,7 @@ from circuikit.services import ThingsBoardGateway
 thingsboard_service = ThingsBoardGateway(token="YOUR_THINGSBOARD_TOKEN")
 ```
 
-**FileLogger**
+##### `FileLogger` Class
 
 A service for logging data to a file.
 
@@ -206,13 +248,11 @@ from circuikit.services import FileLogger
 file_logger_service = FileLogger(file_path="logs/data.log")
 ```
 
+This structure reflects how users can integrate custom and built-in services with Circuikit, using `ServiceAdapter` to stitch their own class functions to the service interface. Adjust the examples and details based on your specific implementation and use cases.
+
 ## Flexible Serial Monitor Interface
 
 Circuikit allows using any serial monitor interface by implementing the `ConcreteSerialMonitorInterface` protocol. Thinkercad is just one example. You can create custom interfaces for real hardware or other simulators by following the `ConcreteSerialMonitorInterface` structure.
-
-### Serial Monitor Interface Protocol
-
-The `SerialMonitorInterface` in Circuikit is designed to handle communication between Circuikit and various serial monitor interfaces, such as Thinkercad or physical hardware. To achieve this, the interface relies on a protocol that defines the essential methods any serial monitor interface must implement. This allows for easy adaptation to different environments and ensures consistent communication.
 
 #### ConcreteSerialMonitorInterface Protocol
 
