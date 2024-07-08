@@ -291,4 +291,8 @@ This project is licensed under the MIT License. See the [LICENSE](./LICENSE) fil
 
 ## Contact
 
-For any questions or suggestions, please feel free to contact us at [stalmail10@gmail.com](mailto:stalmail10@gmail.com).
+For any questions or suggestions, please feel free to contact us.
+
+> <a href="https://github.com/chapost1"><kbd><img src="https://avatars.githubusercontent.com/u/39523779?s=25"/></kbd></a> &nbsp; Shachar Tal
+>
+> [Github](https://github.com/chapost1) | [LinkedIn](https://www.linkedin.com/in/shahar-tal-4aa887166/) | [Email](mailto:stalmail10@gmail.com)
