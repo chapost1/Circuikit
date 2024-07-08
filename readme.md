@@ -189,8 +189,6 @@ The `SerialMonitorOptions` class is used to configure the serial monitor interfa
 
 Got it! If users stitch `ServiceAdapter` to their own class functions before passing them to the service list, we can adjust the table of contents and the related sections accordingly. Here's how you can update the table of contents and the relevant sections in your README:
 
-```markdown
-
 ### Service Integration
 
 #### Creating a Custom Service
