@@ -2,7 +2,7 @@
 
 ### To install run
 ```bash
-pip install git+https://github.com/chapost1/circuikit.git@v0.3.5
+pip install git+https://github.com/chapost1/Circuikit.git@v0.3.5
 ```
 
 ### To run as a sandbox
