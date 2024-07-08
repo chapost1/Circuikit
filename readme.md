@@ -203,7 +203,7 @@ thinkercad_interface = ThinkercadInterface(
     thinkercad_url="https://your-thinkercad-project-url",
     chrome_profile_path=None,  # Optional: Path to Chrome user profile
     debugger_port=8989,  # Optional: Port for Chrome debugging
-    open_simulation_timeout=10,  # Timeout for simulation to load
+    open_simulation_timeout=10,  # Timeout for simulation to load in seconds
 )
 ```
 
