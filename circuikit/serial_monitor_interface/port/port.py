@@ -49,9 +49,6 @@ def compute_port(fixed_port: str | None, detect_port_automatically: bool) -> str
         return fixed_port
 
     if detect_port_automatically:
-        # findint arduino port might involve taking input from user in case of auto detection failure.
-        # taking user input when multiprocessing is involved can be complex, to avoid those kind of complexities
-        # it happens on __init__
         return find_arduino_port()
     else:
         raise ValueError(
@@ -68,11 +65,15 @@ class PortInterface:
         detect_port_automatically: bool = True,
         port: str | None = None,
     ):
+        self.serial = None
+        self.baudrate = baudrate
+        # findint arduino port might involve taking input from user in case of auto detection failure.
+        # taking user input when multiprocessing is involved can be complex, to avoid those kind of complexities
+        # it happens on __init__
         self.port = compute_port(
             fixed_port=port, detect_port_automatically=detect_port_automatically
         )
-        self.baudrate = baudrate
-        self.serial = None
+
 
     def __destroy__(self):
         self.stop()
