@@ -44,7 +44,7 @@ def select_port(arduino_ports: list[ListPortInfo]) -> ListPortInfo:
 
 
 class PortInterface:
-    __slots__ = ("serial",)
+    __slots__ = ("serial", "port", "baudrate")
 
     def __init__(
         self,
@@ -54,36 +54,54 @@ class PortInterface:
     ):
         if port is None:
             if detect_port_automatically:
+                # findint arduino port might involve taking input from user in case of auto detection failure.
+                # taking user input when multiprocessing is involved can be complex, to avoid those kind of complexities
+                # it happens on __init__
                 port = find_arduino_port()
             else:
                 raise ValueError(
                     "Either serial port must be specified or detect_port_automatically should be True"
                 )
         else:
-            # continue with port
+            # continue with oritinal port
             ...
 
-        # timeout=0 means block=False
-        self.serial = serial.Serial(port=port, baudrate=baudrate, timeout=0)
+        self.port = port
+        self.baudrate = baudrate
+        self.serial = None
 
     def __destroy__(self):
         self.stop()
 
     def send_message(self, message: str) -> None:
-        self.serial.write(message.encode(encoding="utf-8"))
+        if self._is_serial_open():
+            self.serial.write(message.encode(encoding="utf-8"))
+        else:
+            ...
 
     def sample(self) -> str | None:
-        return "\n".join(
-            map(
-                lambda s_bytes: s_bytes.decode(encoding="utf-8")
-                .strip("\r\n")
-                .strip("\n"),
-                self.serial.readlines(),
+        if self._is_serial_open():
+            return "\n".join(
+                map(
+                    lambda s_bytes: s_bytes.decode(encoding="utf-8")
+                    .strip("\r\n")
+                    .strip("\n"),
+                    self.serial.readlines(),
+                )
             )
-        )
+        else:
+            return None
 
     def start(self) -> None:
+        if self._is_serial_open():
+            ...
+        # timeout=0 means block=False
+        self.serial = serial.Serial(port=self.port, baudrate=self.baudrate, timeout=0)
         self.serial.open()
 
     def stop(self) -> None:
-        self.serial.close()
+        if self._is_serial_open():
+            self.serial.close()
+
+    def _is_serial_open(self) -> bool:
+        return self.serial is not None and self.serial.is_open
