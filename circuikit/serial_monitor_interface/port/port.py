@@ -6,21 +6,6 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-def find_arduino_port() -> str:
-    ports = serial.tools.list_ports.comports()
-
-    arduino_ports = list(filter(lambda p: "Arduino" in p.description, ports))
-    if not arduino_ports:
-        print("Could not find an arduino - is it plugged in?")
-        port = select_port(ports)
-        return port.device
-    if len(arduino_ports) > 1:
-        print("Multiple Arduinos found - using the first")
-        return arduino_ports[0].device
-    else:
-        return arduino_ports[0].device
-
-
 def select_port(arduino_ports: list[ListPortInfo]) -> ListPortInfo:
     choices = list(map(lambda p: p.name, arduino_ports))
     print("Detected Ports:")
@@ -43,6 +28,37 @@ def select_port(arduino_ports: list[ListPortInfo]) -> ListPortInfo:
     return selected_port
 
 
+def find_arduino_port() -> str:
+    ports = serial.tools.list_ports.comports()
+
+    arduino_ports = list(filter(lambda p: "Arduino" in p.description, ports))
+    if not arduino_ports:
+        print("Could not find an arduino - is it plugged in?")
+        port = select_port(ports)
+        return port.device
+    if len(arduino_ports) > 1:
+        print("Multiple Arduinos found - using the first")
+        return arduino_ports[0].device
+    else:
+        return arduino_ports[0].device
+
+
+def compute_port(fixed_port: str | None, detect_port_automatically: bool) -> str:
+    if fixed_port is not None:
+        # continue with oritinal port
+        return fixed_port
+
+    if detect_port_automatically:
+        # findint arduino port might involve taking input from user in case of auto detection failure.
+        # taking user input when multiprocessing is involved can be complex, to avoid those kind of complexities
+        # it happens on __init__
+        return find_arduino_port()
+    else:
+        raise ValueError(
+            "Either serial port must be specified or detect_port_automatically should be True"
+        )
+
+
 class PortInterface:
     __slots__ = ("serial", "port", "baudrate")
 
@@ -52,21 +68,9 @@ class PortInterface:
         detect_port_automatically: bool = True,
         port: str | None = None,
     ):
-        if port is None:
-            if detect_port_automatically:
-                # findint arduino port might involve taking input from user in case of auto detection failure.
-                # taking user input when multiprocessing is involved can be complex, to avoid those kind of complexities
-                # it happens on __init__
-                port = find_arduino_port()
-            else:
-                raise ValueError(
-                    "Either serial port must be specified or detect_port_automatically should be True"
-                )
-        else:
-            # continue with oritinal port
-            ...
-
-        self.port = port
+        self.port = compute_port(
+            fixed_port=port, detect_port_automatically=detect_port_automatically
+        )
         self.baudrate = baudrate
         self.serial = None
 
