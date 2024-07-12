@@ -7,7 +7,7 @@ logger = logging.getLogger(__name__)
 
 
 def select_port(arduino_ports: list[ListPortInfo]) -> ListPortInfo:
-    choices = list(map(lambda p: f'{p.device} - {p.description}', arduino_ports))
+    choices = list(map(lambda p: f"{p.device} - {p.description}", arduino_ports))
     print("Detected Ports:")
     for i, item in enumerate(choices, 1):
         print(f"{i}. {item}")
@@ -86,14 +86,21 @@ class PortInterface:
 
     def sample(self) -> str | None:
         if self._is_serial_open():
-            return "\n".join(
-                map(
-                    lambda s_bytes: s_bytes.decode(encoding="utf-8")
-                    .strip("\r\n")
-                    .strip("\n"),
-                    self.serial.readlines(),
+            try:
+                return "\n".join(
+                    map(
+                        lambda s_bytes: s_bytes.decode(encoding="utf-8")
+                        .strip("\r\n")
+                        .strip("\n"),
+                        self.serial.readlines(),
+                    )
                 )
-            )
+            except UnicodeDecodeError:
+                logger.error("cannot decode byte; check arduino output or baudrate")
+                return None
+            except Exception as e:
+                logger.error(f"failed to sample readlines; e={e}")
+                return None
         else:
             return None
 
