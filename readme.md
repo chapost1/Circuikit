@@ -52,7 +52,7 @@ Circuikit is a Python package designed to facilitate communication between Pytho
 To install Circuikit, use pip:
 
 ```sh
-pip install git+https://github.com/chapost1/Circuikit.git@v0.3.5
+pip install git+https://github.com/chapost1/Circuikit.git@v0.3.6
 ```
 
 ## Documentation
