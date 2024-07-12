@@ -7,7 +7,7 @@ logger = logging.getLogger(__name__)
 
 
 def select_port(arduino_ports: list[ListPortInfo]) -> ListPortInfo:
-    choices = list(map(lambda p: p.device, arduino_ports))
+    choices = list(map(lambda p: f'{p.device} - {p.description}', arduino_ports))
     print("Detected Ports:")
     for i, item in enumerate(choices, 1):
         print(f"{i}. {item}")
