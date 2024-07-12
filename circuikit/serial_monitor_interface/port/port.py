@@ -7,7 +7,7 @@ logger = logging.getLogger(__name__)
 
 
 def select_port(arduino_ports: list[ListPortInfo]) -> ListPortInfo:
-    choices = list(map(lambda p: p.name, arduino_ports))
+    choices = list(map(lambda p: p.device, arduino_ports))
     print("Detected Ports:")
     for i, item in enumerate(choices, 1):
         print(f"{i}. {item}")
@@ -28,19 +28,19 @@ def select_port(arduino_ports: list[ListPortInfo]) -> ListPortInfo:
     return selected_port
 
 
-def find_arduino_port() -> str:
+def find_arduino_port() -> ListPortInfo:
     ports = serial.tools.list_ports.comports()
 
     arduino_ports = list(filter(lambda p: "Arduino" in p.description, ports))
     if not arduino_ports:
         print("Could not find an arduino - is it plugged in?")
         port = select_port(ports)
-        return port.device
+        return port
     if len(arduino_ports) > 1:
         print("Multiple Arduinos found - using the first")
-        return arduino_ports[0].device
+        return arduino_ports[0]
     else:
-        return arduino_ports[0].device
+        return arduino_ports[0]
 
 
 def compute_port(fixed_port: str | None, detect_port_automatically: bool) -> str:
@@ -49,7 +49,8 @@ def compute_port(fixed_port: str | None, detect_port_automatically: bool) -> str
         return fixed_port
 
     if detect_port_automatically:
-        return find_arduino_port()
+        found_port = find_arduino_port()
+        return found_port.device
     else:
         raise ValueError(
             "Either serial port must be specified or detect_port_automatically should be True"
