@@ -74,7 +74,6 @@ class PortInterface:
             fixed_port=port, detect_port_automatically=detect_port_automatically
         )
 
-
     def __destroy__(self):
         self.stop()
 
@@ -102,7 +101,9 @@ class PortInterface:
             ...
         # timeout=0 means block=False
         self.serial = serial.Serial(port=self.port, baudrate=self.baudrate, timeout=0)
-        self.serial.open()
+        # try:
+        if not self.serial.is_open:
+            self.serial.open()
 
     def stop(self) -> None:
         if self._is_serial_open():
