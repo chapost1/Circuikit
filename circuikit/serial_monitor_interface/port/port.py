@@ -2,6 +2,7 @@ import serial
 import serial.tools.list_ports
 from serial.tools.list_ports_common import ListPortInfo
 import logging
+import os
 
 logger = logging.getLogger(__name__)
 
@@ -57,6 +58,22 @@ def compute_port(fixed_port: str | None, detect_port_automatically: bool) -> str
         )
 
 
+def _readline(serial: serial.Serial) -> str | None:
+    # Using custom readline function because native readline fn of serial does not handle properly long lines.
+    eol = os.linesep.encode("utf-8")
+    leneol = len(eol)
+    line = bytearray()
+    while True:
+        c = serial.read(1)
+        if c:
+            line += c
+            if line[-leneol:] == eol:
+                break
+        else:
+            break
+    return bytes(line).decode(encoding="utf-8").strip(os.linesep)
+
+
 class PortInterface:
     __slots__ = ("serial", "port", "baudrate")
 
@@ -87,14 +104,7 @@ class PortInterface:
     def sample(self) -> str | None:
         if self._is_serial_open():
             try:
-                return "\n".join(
-                    map(
-                        lambda s_bytes: s_bytes.decode(encoding="utf-8")
-                        .strip("\r\n")
-                        .strip("\n"),
-                        self.serial.readlines(),
-                    )
-                )
+                return _readline(serial=self.serial)
             except UnicodeDecodeError:
                 logger.error("cannot decode byte; check arduino output or baudrate")
                 return None
