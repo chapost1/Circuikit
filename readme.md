@@ -1,7 +1,7 @@
 # ⚙️ Circuikit
 
 ![Python](https://img.shields.io/badge/python-3.10%2B-purple)
-![LTS](https://img.shields.io/badge/LTS-v0.3.7-blue)
+![LTS](https://img.shields.io/badge/LTS-v0.3.8-blue)
 
 
 ## Overview
@@ -52,7 +52,7 @@ Circuikit is a Python package designed to facilitate communication between Pytho
 To install Circuikit, use pip:
 
 ```sh
-pip install git+https://github.com/chapost1/Circuikit.git@v0.3.7
+pip install git+https://github.com/chapost1/Circuikit.git@v0.3.8
 ```
 
 ## Documentation
