@@ -10,9 +10,6 @@ Circuikit is a Python package designed to facilitate communication between Pytho
 
 ## Table of Contents
 
-<details>
-<summary>Click to expand</summary>
-
 - [Overview](#overview)
 - [Installation](#installation)
 - [Documentation](#documentation)
@@ -25,6 +22,7 @@ Circuikit is a Python package designed to facilitate communication between Pytho
   - [Using Built-in Services](#using-built-in-services)
     - [`ThingsBoardGateway` Class](#thingsboardgateway-class)
     - [`FileLogger` Class](#filelogger-class)
+  - [Combining with UI Frameworks](#combining-with-ui-frameworks)
 - [Flexible Serial Monitor Interface](#flexible-serial-monitor-interface)
   - [`ConcreteSerialMonitorInterface` Protocol](#concreteserialmonitorinterface-protocol)
 - [ThinkercadInterface](#thinkercadinterface)
@@ -44,8 +42,6 @@ Circuikit is a Python package designed to facilitate communication between Pytho
   - [Adding New Built-in Serial Monitor Interfaces](#adding-new-built-in-serial-monitor-interfaces)
 - [License](#license)
 - [Contact](#contact)
-
-</details>
 
 ## Installation
 
