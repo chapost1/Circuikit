@@ -152,7 +152,114 @@ from circuikit.services import FileLogger
 file_logger_service = FileLogger(file_path="logs/data.log")
 ```
 
-This structure reflects how users can integrate custom and built-in services with Circuikit, using `ServiceAdapter` to stitch their own class functions to the service interface. Adjust the examples and details based on your specific implementation and use cases.
+#### Combining with UI Frameworks
+
+When integrating Circuikit with a UI framework like Tkinter or Qt, keep in mind that these UIs run in the main thread and will block it. To update the UI based on external updates (such as incoming data), you need to use techniques provided by each library to ensure UI changes are performed in the main thread.
+
+**Tkinter Example**
+
+Tkinter provides the `after` method to schedule a function to be called after a certain period of time. Here’s an example:
+
+```python
+import tkinter as tk
+from circuikit import Circuikit
+from circuikit.serial_monitor_interface import PortInterface
+from circuikit.serial_monitor_interface.types import SerialMonitorOptions
+
+# Create the Tkinter root window
+root = tk.Tk()
+
+# Define a function to update the UI
+def update_ui(data):
+    label.config(text=data)
+
+# Initialize the UI components
+label = tk.Label(root, text="Waiting for data...")
+label.pack()
+
+# Define a function to handle incoming messages
+def handle_message(message):
+    root.after(0, update_ui, message)
+
+# Create SerialMonitorOptions and PortInterface
+serial_monitor_options = SerialMonitorOptions(
+    timestamp_field_name="timestamp_ms",
+    interface=PortInterface(baudrate=115200),
+    sample_rate_ms=25,
+)
+
+# Initialize Circuikit with the custom service
+kit = Circuikit(
+    serial_monitor_options=serial_monitor_options,
+    services=[ServiceAdapter(on_new_message_fn=handle_message)]
+)
+
+# Start Circuikit
+kit.start(block=False)
+
+# Start the Tkinter main loop
+root.mainloop()
+```
+
+**Qt Example**
+
+In Qt, you can use `signals` and `slots` to handle UI updates in the main thread. Here’s an example using PyQt:
+
+```python
+from PyQt5.QtWidgets import QApplication, QLabel, QWidget, QVBoxLayout
+from PyQt5.QtCore import pyqtSignal, QObject
+from circuikit import Circuikit
+from circuikit.serial_monitor_interface import PortInterface
+from circuikit.serial_monitor_interface.types import SerialMonitorOptions
+
+class UIUpdater(QObject):
+    update_signal = pyqtSignal(str)
+
+    def __init__(self, label):
+        super().__init__()
+        self.label = label
+        self.update_signal.connect(self.update_label)
+
+    def update_label(self, data):
+        self.label.setText(data)
+
+# Create the QApplication and main window
+app = QApplication([])
+window = QWidget()
+layout = QVBoxLayout()
+label = QLabel("Waiting for data...")
+layout.addWidget(label)
+window.setLayout(layout)
+window.show()
+
+# Create the UIUpdater object
+ui_updater = UIUpdater(label)
+
+# Define a function to handle incoming messages
+def handle_message(message):
+    ui_updater.update_signal.emit(message)
+
+# Create SerialMonitorOptions and PortInterface
+serial_monitor_options = SerialMonitorOptions(
+    timestamp_field_name="timestamp_ms",
+    interface=PortInterface(baudrate=115200),
+    sample_rate_ms=25,
+)
+
+# Initialize Circuikit with the custom service
+kit = Circuikit(
+    serial_monitor_options=serial_monitor_options,
+    services=[ServiceAdapter(on_new_message_fn=handle_message)]
+)
+
+# Start Circuikit
+kit.start(block=False)
+
+# Start the Qt main loop
+app.exec_()
+```
+
+Be aware that each UI framework has its own mechanisms, so make sure you understand the tool you are using.
 
 ## Flexible Serial Monitor Interface
 
